@@ -8,11 +8,13 @@ import {
   AlertTriangle,
   FileCode,
   CheckCircle2,
-  RotateCw,
+  Check,
   Lock,
   FileText,
   Truck,
   Compass,
+  ArrowRight,
+  X,
 } from 'lucide-react';
 
 interface LedgerTabProps {
@@ -20,6 +22,7 @@ interface LedgerTabProps {
   verification: LedgerVerification | null;
   onVerify: () => Promise<void>;
   verifying: boolean;
+  onNavigateMatchDeals?: () => void;
 }
 
 export const LedgerTab: React.FC<LedgerTabProps> = ({
@@ -27,35 +30,45 @@ export const LedgerTab: React.FC<LedgerTabProps> = ({
   verification,
   onVerify,
   verifying,
+  onNavigateMatchDeals,
 }) => {
   const [viewJsonIndex, setViewJsonIndex] = useState<number | null>(null);
   const [selectedContractPassport, setSelectedContractPassport] = useState<DigitalWastePassport | null>(null);
+  const [showMatchWarningModal, setShowMatchWarningModal] = useState(false);
+
+  const handleVerifyClick = () => {
+    if (passports.length === 0) {
+      setShowMatchWarningModal(true);
+      return;
+    }
+    onVerify();
+  };
 
   return (
     <div className="space-y-6">
       {/* Top Banner Card */}
-      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-6 sm:p-8 shadow-sm">
+      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
           <div>
             <div className="text-[11px] font-extrabold tracking-wider text-[#ea580c] uppercase mb-1 font-mono">
-              CRYPTO IMMUTABILITY LEDGER
+              CERTIFIED WASTE PASSPORTS
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight flex items-center gap-2">
-              <span>Digital Waste Passport Ledger (SHA-256 Hash-Chained)</span>
+              <span>Digital Waste Passports & Audit Log</span>
             </h1>
             <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
-              Tamper-evident distributed audit trail: each minted passport cryptographically binds to the previous transaction hash, certifying KSPCB clearance, transport manifest, and carbon avoidance.
+              Every approved industrial deal receives a certified digital waste passport. Records are linked together to prevent tampering and guarantee compliance with Karnataka environmental laws.
             </p>
           </div>
 
           <button
             id="verify-ledger-btn"
-            onClick={onVerify}
+            onClick={handleVerifyClick}
             disabled={verifying}
             className="inline-flex items-center gap-2 px-5 py-3 text-xs font-bold rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-900 border border-stone-300 transition shrink-0 active:scale-95 disabled:opacity-50"
           >
-            <RotateCw className={`w-4 h-4 text-[#ea580c] ${verifying ? 'animate-spin' : ''}`} />
-            {verifying ? 'Validating Chain...' : 'Re-verify Hash Chain'}
+            <Check className="w-4 h-4 text-[#ea580c] stroke-[2.5]" />
+            {verifying ? 'Verifying Records...' : 'Verify Record Chain'}
           </button>
         </div>
 
@@ -96,9 +109,9 @@ export const LedgerTab: React.FC<LedgerTabProps> = ({
       {passports.length === 0 ? (
         <div className="text-center py-20 px-4 rounded-3xl border border-dashed border-orange-200 bg-white">
           <Hash className="w-12 h-12 mx-auto text-orange-300 mb-3" />
-          <h3 className="text-base font-bold text-stone-800">No Passports Issued Yet</h3>
+          <h3 className="text-base font-bold text-stone-800">no passports issued yet</h3>
           <p className="text-xs sm:text-sm text-stone-500 mt-1 max-w-md mx-auto leading-relaxed">
-            Execute the circular symbiosis pipeline in the "Run Pipeline" tab. When a trade is agreed and approved by the KSPCB Regulatory Agent, a SHA-256 Digital Waste Passport block is chained here.
+            awaiting cryptography integrity waiting
           </p>
         </div>
       ) : (
@@ -260,6 +273,61 @@ export const LedgerTab: React.FC<LedgerTabProps> = ({
           ewayBill={selectedContractPassport.deal.eway_bill}
           hazardManifest={selectedContractPassport.deal.hazard_manifest}
         />
+      )}
+
+      {/* Warning Popup: Verify Clicked Before Deals are Matched */}
+      {showMatchWarningModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            id="match-deals-required-modal"
+            className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-orange-200 text-left relative transform transition-all"
+          >
+            <button
+              onClick={() => setShowMatchWarningModal(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition"
+              aria-label="Close dialog"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center mb-4">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+
+            <div className="text-xs font-black tracking-wider text-[#ea580c] uppercase mb-1 font-mono">
+              ACTION REQUIRED
+            </div>
+            <h3 className="text-lg font-bold text-stone-900 mb-2">
+              Please Match Deals First
+            </h3>
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed mb-6">
+              No industrial trade deals have been matched or approved yet, so there are no cryptographic blocks in the chain to verify. Please head to <strong>Match Deals</strong> to simulate transactions and generate verified digital waste passports before verifying the record chain.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center gap-2.5">
+              {onNavigateMatchDeals && (
+                <button
+                  id="modal-goto-match-deals-btn"
+                  onClick={() => {
+                    setShowMatchWarningModal(false);
+                    onNavigateMatchDeals();
+                  }}
+                  className="w-full sm:flex-1 py-2.5 px-4 bg-[#ff5d02] hover:bg-[#e04f00] text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
+                >
+                  <span>Head to Match Deals</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
+              <button
+                id="modal-dismiss-warning-btn"
+                onClick={() => setShowMatchWarningModal(false)}
+                className="w-full sm:w-auto py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs rounded-xl transition"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
