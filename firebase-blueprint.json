@@ -33,6 +33,32 @@
         "issuer": { "type": "string", "description": "Certifying authority" }
       },
       "required": ["record_hash", "prev_hash", "issued_at"]
+    },
+    "sensor_telemetry": {
+      "title": "Sensor Telemetry",
+      "description": "IoT sensory readings and quality assurance logs for industrial facilities",
+      "type": "object",
+      "properties": {
+        "facility_id": { "type": "string", "description": "Reference ID of facility" },
+        "moisture_pct": { "type": "number", "description": "Moisture percentage measured by sensor" },
+        "contamination_flag": { "type": "boolean", "description": "Flag indicating detected contamination" },
+        "recorded_at": { "type": "string", "description": "ISO timestamp when telemetry was captured" }
+      },
+      "required": ["facility_id", "moisture_pct", "contamination_flag", "recorded_at"]
+    }
+  },
+  "firestore": {
+    "/facilities/{facilityId}": {
+      "schema": "facilities",
+      "description": "Participating manufacturing plants, foundries, and authorized recyclers"
+    },
+    "/passports/{passportId}": {
+      "schema": "passports",
+      "description": "Chained digital waste passports"
+    },
+    "/sensor_telemetry/{telemetryId}": {
+      "schema": "sensor_telemetry",
+      "description": "Live IoT telemetry readings for industrial waste quality"
     }
   }
 }

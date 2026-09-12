@@ -246,11 +246,11 @@ export const LedgerTab: React.FC<LedgerTabProps> = ({
                     </div>
 
                     <button
-                      onClick={() => setSelectedContractPassport(p)}
-                      className="px-3.5 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs transition flex items-center gap-1.5 shrink-0 self-start sm:self-auto"
+                      onClick={() => setViewJsonIndex(isJsonOpen ? null : idx)}
+                      className="inline-flex items-center gap-1.5 text-xs text-stone-700 hover:text-stone-900 bg-white hover:bg-stone-100 border border-stone-200 px-3.5 py-1.5 rounded-xl font-semibold transition shrink-0 self-start sm:self-auto shadow-2xs"
                     >
-                      <FileText className="w-3.5 h-3.5 text-orange-400" />
-                      <span>Inspect Legal Documents</span>
+                      <FileCode className="w-3.5 h-3.5 text-[#ea580c]" />
+                      <span>{isJsonOpen ? 'Hide Block Payload' : 'Inspect Block Payload'}</span>
                     </button>
                   </div>
                 )}
@@ -278,7 +278,7 @@ export const LedgerTab: React.FC<LedgerTabProps> = ({
                   </div>
                 </div>
 
-                {/* Footer and Raw JSON Toggle */}
+                {/* Footer with KSPCB Status and Legal Documents button */}
                 <div className="flex items-center justify-between pt-1">
                   <div className="text-xs text-stone-500 flex items-center gap-1.5">
                     <Lock className="w-3.5 h-3.5 text-emerald-600" />
@@ -286,13 +286,15 @@ export const LedgerTab: React.FC<LedgerTabProps> = ({
                     <strong className="text-emerald-700 font-semibold">Approved & Cryptographically Signed</strong>
                   </div>
 
-                  <button
-                    onClick={() => setViewJsonIndex(isJsonOpen ? null : idx)}
-                    className="inline-flex items-center gap-1 text-xs text-stone-700 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 px-3.5 py-1.5 rounded-lg font-semibold transition"
-                  >
-                    <FileCode className="w-3.5 h-3.5 text-[#ea580c]" />
-                    {isJsonOpen ? 'Hide Block Payload' : 'Inspect Block Payload'}
-                  </button>
+                  {(p.deal.contract || p.deal.eway_bill) && (
+                    <button
+                      onClick={() => setSelectedContractPassport(p)}
+                      className="px-3.5 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs transition flex items-center gap-1.5 shrink-0"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-orange-400" />
+                      <span>Inspect Legal Documents</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Raw JSON inspection view */}

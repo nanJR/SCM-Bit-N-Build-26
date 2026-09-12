@@ -23,8 +23,8 @@ export const HonestLimitationsModal: React.FC<HonestLimitationsModalProps> = ({ 
       icon: Compass,
       currentState: 'Straight-line geodesic distance (Haversine × 1.25 road circuity factor).',
       productionReality:
-        'Heavy commercial vehicles in Bengaluru face NICE Road toll gates, BBMP peak-hour truck entry restrictions, and bridge weight load limits. A live fleet API (Google Maps Routes API / OSRM) with truck routing parameters would be required for live dispatch.',
-      impact: 'Straight-line distance gives an initial distance estimate, but real trucks must route around city entry curbs and toll plazas.',
+        'Heavy commercial vehicles in Bengaluru face NICE Road toll gates, BBMP peak-hour commercial vehicle restrictions, and bridge weight load limits. In production, an enterprise logistics dispatch API with freight routing parameters would calculate transport corridors.',
+      impact: 'Straight-line geodesic distance gives an initial distance estimate, but commercial freight carriers must route around city entry curbs and toll plazas.',
     },
     {
       dimension: 'Contractual Execution',
