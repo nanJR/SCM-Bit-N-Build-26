@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Facility } from '../types';
+import { formatMaterialTitleCase, getMaterialBadgeStyles } from '../utils/materials';
+import { AddFacilityModal } from './AddFacilityModal';
 import {
   Sliders,
   AlertTriangle,
@@ -19,6 +21,8 @@ import {
   ChevronUp,
   FlaskConical,
   FileText,
+  PlusCircle,
+  Cloud,
 } from 'lucide-react';
 
 interface FacilitiesTabProps {
@@ -29,6 +33,7 @@ interface FacilitiesTabProps {
     contamination: boolean
   ) => Promise<void>;
   onDescribeFacility: (id: string) => Promise<string>;
+  onAddFacility?: (facilityData: Partial<Facility>) => Promise<void>;
   onOpenStandards?: () => void;
   onRunPipelineNav?: () => void;
 }
@@ -37,10 +42,12 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
   facilities,
   onUpdateSensor,
   onDescribeFacility,
+  onAddFacility,
   onOpenStandards,
   onRunPipelineNav,
 }) => {
   const facilityList = Object.values(facilities);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedFacilityId, setSelectedFacilityId] = useState<string>(
     facilityList[0]?.id || 'F01'
   );
@@ -127,12 +134,22 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
             </p>
           </div>
           
-          <div className="flex items-center gap-2 shrink-0 self-start md:self-center">
+          <div className="flex items-center gap-2.5 shrink-0 self-start md:self-center flex-wrap">
+            <button
+              id="header-onboard-facility-btn"
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-[#ff5d02] hover:bg-[#ea580c] text-white font-bold px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2 w-full sm:w-auto"
+              title="Add a custom industrial manufacturing plant or authorized recycler"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>+ Onboard Factory</span>
+            </button>
+
             {onOpenStandards && (
               <button
                 id="header-rules-btn"
                 onClick={onOpenStandards}
-                className="bg-white hover:bg-orange-50 border border-orange-200 hover:border-orange-300 text-stone-800 hover:text-orange-950 font-bold px-5 py-2.5 rounded-xl text-sm shadow-xs transition flex items-center justify-center gap-2 w-full sm:w-auto"
+                className="bg-white hover:bg-orange-50 border border-orange-200 hover:border-orange-300 text-stone-800 hover:text-orange-950 font-bold px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-xs transition flex items-center justify-center gap-2 w-full sm:w-auto"
                 title="View KSPCB, CPCB C&D 2016 and environmental standards"
               >
                 <FileCheck2 className="w-4 h-4 text-orange-600" />
@@ -159,10 +176,11 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
+              id="facilities-search-input"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="e.g. Rock Crystals, Peenya, C&D Aggregate, VIWA CETP, Fly Ash, XGN-2023..."
+              placeholder="e.g. Rock Crystals, Peenya, C&D Aggregate"
               className="w-full pl-10 pr-4 py-2.5 bg-stone-50/70 border border-stone-200 rounded-xl text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:bg-white transition"
             />
           </div>
@@ -453,10 +471,10 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
                 )}
 
                 <div className="mt-3.5 space-y-1.5 text-xs">
-                  <div className="flex justify-between py-1 border-b border-stone-100">
+                  <div className="flex items-center justify-between py-1 border-b border-stone-100">
                     <span className="text-stone-500">Material Stream:</span>
-                    <span className="font-semibold text-stone-800 capitalize">
-                      {f.material.replace(/_/g, ' ')}
+                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${getMaterialBadgeStyles(f.material)}`}>
+                      {formatMaterialTitleCase(f.material)}
                     </span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-stone-100">
@@ -561,6 +579,12 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
           </button>
         )}
       </section>
+
+      <AddFacilityModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAdd={onAddFacility || (async () => {})}
+      />
     </div>
   );
 };

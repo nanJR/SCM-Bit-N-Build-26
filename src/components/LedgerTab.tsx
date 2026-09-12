@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DigitalWastePassport, LedgerVerification } from '../types';
 import { ContractModal } from './ContractModal';
+import { formatMaterialTitleCase, getMaterialBadgeStyles } from '../utils/materials';
 import {
   ShieldCheck,
   Hash,
@@ -9,6 +10,7 @@ import {
   FileCode,
   CheckCircle2,
   Check,
+  Clock,
   Lock,
   FileText,
   Truck,
@@ -22,6 +24,7 @@ interface LedgerTabProps {
   verification: LedgerVerification | null;
   onVerify: () => Promise<void>;
   verifying: boolean;
+  hasUserVerified: boolean;
   onNavigateMatchDeals?: () => void;
 }
 
@@ -30,18 +33,31 @@ export const LedgerTab: React.FC<LedgerTabProps> = ({
   verification,
   onVerify,
   verifying,
+  hasUserVerified,
   onNavigateMatchDeals,
 }) => {
   const [viewJsonIndex, setViewJsonIndex] = useState<number | null>(null);
   const [selectedContractPassport, setSelectedContractPassport] = useState<DigitalWastePassport | null>(null);
   const [showMatchWarningModal, setShowMatchWarningModal] = useState(false);
 
-  const handleVerifyClick = () => {
+  const handleVerifyClick = async () => {
     if (passports.length === 0) {
       setShowMatchWarningModal(true);
       return;
     }
-    onVerify();
+    await onVerify();
+  };
+
+  const isVerifiedByClick = Boolean(hasUserVerified && passports.length > 0 && verification?.valid);
+
+  const getDisplayMessage = () => {
+    if (!verification) return '';
+    let msg = verification.message;
+    // Remove "Chain Valid:" / "Chain valid:" before "0 Digital..." unless deals matched
+    if (passports.length === 0) {
+      msg = msg.replace(/^chain\s*valid:\s*/i, '');
+    }
+    return msg;
   };
 
   return (
@@ -56,8 +72,11 @@ export const LedgerTab: React.FC<LedgerTabProps> = ({
             <h1 className="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight flex items-center gap-2">
               <span>Digital Waste Passports & Audit Log</span>
             </h1>
-            <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
-              Every approved industrial deal receives a certified digital waste passport. Records are linked together to prevent tampering and guarantee compliance with Karnataka environmental laws.
+            <p id="ledger-header-desc" className="text-xs sm:text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
+              Every approved industrial deal receives a certified digital waste passport.
+              <span className="block mt-0.5 sm:mt-1">
+                Records are linked together to prevent tampering and guarantee compliance with Karnataka environmental laws.
+              </span>
             </p>
           </div>
 
@@ -75,31 +94,55 @@ export const LedgerTab: React.FC<LedgerTabProps> = ({
         {/* Verification Status Banner */}
         {verification && (
           <div
+            id="ledger-verification-banner"
             className={`mt-6 p-4 rounded-2xl border text-xs flex items-center justify-between gap-4 ${
-              verification.valid
+              !verification.valid
+                ? 'bg-rose-50 border-rose-300 text-rose-900'
+                : isVerifiedByClick
                 ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                : 'bg-rose-50 border-rose-300 text-rose-900'
+                : 'bg-orange-50 border-orange-300 text-orange-950'
             }`}
           >
             <div className="flex items-center gap-3">
-              {verification.valid ? (
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              {!verification.valid ? (
+                <div id="ledger-verification-icon-box" className="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+              ) : isVerifiedByClick ? (
+                <div id="ledger-verification-icon-box" className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
               ) : (
-                <div className="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
-                  <AlertTriangle className="w-5 h-5" />
+                <div id="ledger-verification-icon-box" className="w-9 h-9 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5" />
                 </div>
               )}
               <div>
-                <div className="font-bold text-sm">
-                  {verification.valid ? 'Cryptographic Integrity Confirmed' : 'Ledger Integrity Warning'}
+                <div id="ledger-verification-status-title" className="font-bold text-sm">
+                  {!verification.valid
+                    ? 'Ledger Integrity Warning'
+                    : isVerifiedByClick
+                    ? 'Cryptographic Integrity Confirmed'
+                    : 'Awaiting Cryptographic Integrity Confirmation'}
                 </div>
-                <div className="text-xs opacity-90">{verification.message}</div>
+                <div id="ledger-verification-status-message" className="text-xs opacity-90">
+                  {getDisplayMessage()}
+                </div>
               </div>
             </div>
-            <span className="text-xs font-mono font-bold px-3 py-1 rounded-lg bg-white border border-emerald-300 text-emerald-800 shadow-2xs">
-              {passports.length} Verified Blocks
+            <span
+              id="ledger-verification-badge"
+              className={`text-xs font-mono font-bold px-3 py-1 rounded-lg bg-white border shadow-2xs ${
+                !verification.valid
+                  ? 'border-rose-300 text-rose-800'
+                  : isVerifiedByClick
+                  ? 'border-emerald-300 text-emerald-800'
+                  : 'border-orange-300 text-orange-800'
+              }`}
+            >
+              {isVerifiedByClick
+                ? `${passports.length} Verified Blocks`
+                : `${passports.length} Unverified Blocks`}
             </span>
           </div>
         )}
@@ -107,12 +150,9 @@ export const LedgerTab: React.FC<LedgerTabProps> = ({
 
       {/* Passports List */}
       {passports.length === 0 ? (
-        <div className="text-center py-20 px-4 rounded-3xl border border-dashed border-orange-200 bg-white">
+        <div id="empty-passports-state" className="text-center py-20 px-4 rounded-3xl border border-dashed border-orange-200 bg-white">
           <Hash className="w-12 h-12 mx-auto text-orange-300 mb-3" />
-          <h3 className="text-base font-bold text-stone-800">no passports issued yet</h3>
-          <p className="text-xs sm:text-sm text-stone-500 mt-1 max-w-md mx-auto leading-relaxed">
-            awaiting cryptography integrity waiting
-          </p>
+          <h3 id="no-passports-heading" className="text-base font-bold text-stone-800">No Passports Issued Yet</h3>
         </div>
       ) : (
         <div className="space-y-4">
@@ -140,8 +180,11 @@ export const LedgerTab: React.FC<LedgerTabProps> = ({
                     <span className="text-xs font-mono font-bold px-3 py-1 rounded-lg bg-orange-100 text-[#ea580c] border border-orange-200">
                       Block #{idx + 1}
                     </span>
-                    <span className="text-sm font-bold text-stone-900 capitalize">
-                      Waste Passport ({p.deal.material.replace(/_/g, ' ')})
+                    <span className="text-sm font-bold text-stone-900 flex items-center gap-1.5 flex-wrap">
+                      <span>Waste Passport</span>
+                      <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${getMaterialBadgeStyles(p.deal.material)}`}>
+                        {formatMaterialTitleCase(p.deal.material)}
+                      </span>
                     </span>
                     {isGenesis && (
                       <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200 font-bold uppercase">

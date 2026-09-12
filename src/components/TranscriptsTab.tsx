@@ -1,5 +1,6 @@
 import React from 'react';
 import { PipelineItemResult } from '../types';
+import { formatMaterialTitleCase, getMaterialBadgeStyles } from '../utils/materials';
 import { FileText, ArrowRight, Scale, CheckCircle2, XCircle, ShieldAlert, Sparkles, Building2 } from 'lucide-react';
 
 interface TranscriptsTabProps {
@@ -62,7 +63,7 @@ export const TranscriptsTab: React.FC<TranscriptsTabProps> = ({
             >
               {results.map((r, i) => (
                 <option key={i} value={i}>
-                  {r.seller.name.slice(0, 24)} ↔ {r.buyer.name.slice(0, 24)} ({r.negotiation.outcome})
+                  {r.seller.name.slice(0, 24)} ↔ {r.buyer.name.slice(0, 24)} ({r.negotiation.outcome.replace(/_/g, ' ')})
                 </option>
               ))}
             </select>
@@ -83,7 +84,12 @@ export const TranscriptsTab: React.FC<TranscriptsTabProps> = ({
                 <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900">Buyer</span>
               </div>
               <div className="text-xs text-stone-500 mt-1.5 flex items-center gap-2 sm:gap-3 flex-wrap">
-                <span>Material: <strong className="text-stone-800 font-mono capitalize">{match.material.replace(/_/g, ' ')}</strong></span>
+                <span className="flex items-center gap-1.5">
+                  <span>Material:</span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getMaterialBadgeStyles(match.material)}`}>
+                    {formatMaterialTitleCase(match.material)}
+                  </span>
+                </span>
                 <span>•</span>
                 <span>Volume: <strong className="text-stone-800 font-mono">{negotiation.volume_tons} t/month</strong></span>
                 <span>•</span>
@@ -120,7 +126,14 @@ export const TranscriptsTab: React.FC<TranscriptsTabProps> = ({
             </div>
             <div className="bg-white p-3 rounded-xl border border-stone-200 shadow-2xs">
               <span className="text-stone-500 block font-medium">Termination Reason:</span>
-              <span className="text-stone-900 font-mono font-bold text-sm">{negotiation.outcome}</span>
+              <span
+                id="transcript-termination-reason"
+                className={`font-mono font-bold text-sm ${
+                  negotiation.outcome === 'NO_DEAL' ? 'text-rose-800' : 'text-emerald-800'
+                }`}
+              >
+                {negotiation.outcome.replace(/_/g, ' ')}
+              </span>
               <span className="text-[10px] text-stone-500 block mt-0.5">
                 {negotiation.reason || 'Concession reached price overlap before Round 5 deadline'}
               </span>

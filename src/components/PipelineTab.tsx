@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PipelineItemResult } from '../types';
 import { ContractModal } from './ContractModal';
+import { formatMaterialTitleCase, getMaterialBadgeStyles } from '../utils/materials';
 import {
   Play,
   CheckCircle2,
@@ -230,8 +231,13 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                         <span className="text-sm font-bold text-stone-900">{r.seller.name}</span>
                         <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
                         <span className="text-sm font-bold text-stone-900">{r.buyer.name}</span>
-                        <span className="text-xs px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 font-mono font-medium">
-                          {r.match.material.replace(/_/g, ' ')}
+                        <span
+                          id={`pipeline-material-tag-${idx}`}
+                          className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border shadow-2xs ${getMaterialBadgeStyles(
+                            r.match.material
+                          )}`}
+                        >
+                          {formatMaterialTitleCase(r.match.material)}
                         </span>
                         {r.seller.hazardous && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold border border-amber-200">

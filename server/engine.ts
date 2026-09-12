@@ -21,6 +21,12 @@ import {
 } from '../src/types';
 import { getDefaultFacilities, MATERIAL_TAXONOMY } from './data';
 import { askGemini } from './gemini';
+import {
+  syncFacilitiesWithFirestore,
+  saveFacilityToFirestore,
+  logTelemetryToFirestore,
+  savePassportsToFirestore,
+} from './firebase';
 
 const MAX_FEASIBLE_RADIUS_KM = 60;
 const TRUCK_COST_PER_KM_PER_TON = 8.0;
@@ -705,6 +711,8 @@ class SymbiosisEngine {
     this.passports = [];
     this.pipelineResults = [];
     this.loadPassportsFromFile();
+    // Non-blocking Firestore synchronization
+    this.initFirestore();
   }
 
   loadPassportsFromFile() {
@@ -722,11 +730,79 @@ class SymbiosisEngine {
     }
   }
 
+  async initFirestore() {
+    try {
+      this.facilities = await syncFacilitiesWithFirestore(this.facilities);
+    } catch (e) {
+      console.warn('Firestore initial sync deferred:', e);
+    }
+  }
+
+  async addFacility(data: Partial<Facility>): Promise<Facility> {
+    const clusterCoords: Record<string, { lat: number; lon: number }> = {
+      Peenya: { lat: 13.0334, lon: 77.5141 },
+      Dobaspet: { lat: 13.2356, lon: 77.2089 },
+      Bidadi: { lat: 12.7981, lon: 77.3828 },
+      Whitefield: { lat: 12.9698, lon: 77.75 },
+      Bommasandra: { lat: 12.8167, lon: 77.6833 },
+      Jigani: { lat: 12.7833, lon: 77.6333 },
+      Dabaspet: { lat: 13.2356, lon: 77.2089 },
+      Rajajinagar: { lat: 12.9982, lon: 77.553 },
+      Veerasandra: { lat: 12.8398, lon: 77.6775 },
+    };
+
+    const cluster = data.cluster || 'Peenya';
+    const coords = clusterCoords[cluster] || { lat: 13.0334, lon: 77.5141 };
+    const randNum = Math.floor(100 + Math.random() * 900);
+    const id = data.id && data.id.trim().length > 0 ? data.id.trim() : `FAC-BLR-${randNum}`;
+    const vol = Number(data.volume_tons_per_month) || 100;
+    const role = data.role === 'buyer' ? 'buyer' : 'seller';
+
+    const newFacility: Facility = {
+      id,
+      name: data.name || `Industrial Plant ${randNum}`,
+      role,
+      cluster,
+      lat: Number(coords.lat.toFixed(4)) + (Math.random() - 0.5) * 0.015,
+      lon: Number(coords.lon.toFixed(4)) + (Math.random() - 0.5) * 0.015,
+      material: data.material || 'recycled_concrete_aggregate',
+      material_category: data.material_category || MATERIAL_TAXONOMY[data.material || 'recycled_concrete_aggregate']?.category || 'inert_mineral_aggregate',
+      certified_hazard_handler: Boolean(data.certified_hazard_handler ?? data.hazardous),
+      volume_tons_per_month: vol,
+      cost_floor_inr_per_ton: role === 'seller' ? (Number(data.cost_floor_inr_per_ton) || 450) : null,
+      cost_ceiling_inr_per_ton: role === 'buyer' ? (Number(data.cost_ceiling_inr_per_ton) || 850) : null,
+      hazardous: Boolean(data.hazardous),
+      cepi_zone: data.cepi_zone || (cluster === 'Peenya' ? 'Peenya CEPI Score 65.11 (Severely Polluted)' : undefined),
+      gstin: data.gstin || `29AABC${randNum}1Z5`,
+      kspcb_consent_id: data.kspcb_consent_id || `KSPCB/XGN/BNG/${randNum}/2024`,
+      xgn_details: {
+        consent_id: data.kspcb_consent_id || `KSPCB/XGN/BNG/${randNum}/2024`,
+        consent_type: Boolean(data.hazardous) ? 'Red-CFO' : 'Orange-CFO',
+        valid_till: '31/03/2026',
+        is_active: true,
+        authorized_monthly_quota_tons: Math.round(vol * 1.5),
+        current_month_consumed_tons: Math.round(vol * 0.15),
+        category: Boolean(data.hazardous) ? 'Red Category (High Impact)' : 'Orange Category (Medium Impact)',
+      },
+    };
+
+    this.facilities[newFacility.id] = newFacility;
+    // Persist to Cloud Firestore
+    saveFacilityToFirestore(newFacility).catch((err) =>
+      console.warn('Failed to persist new facility to Firestore:', err)
+    );
+
+    return newFacility;
+  }
+
   reset() {
     this.facilities = getDefaultFacilities();
     this.passports = [];
     this.pipelineResults = [];
     this.savePassportsToFile();
+    syncFacilitiesWithFirestore(this.facilities).catch((err) =>
+      console.warn('Failed to reseed Firestore on reset:', err)
+    );
   }
 
   getFacilities() {
@@ -749,6 +825,14 @@ class SymbiosisEngine {
         facility.cost_floor_inr_per_ton = Math.round(facility.cost_floor_inr_per_ton * 0.85);
       }
     }
+
+    // Persist telemetry and updated facility in Firestore
+    logTelemetryToFirestore(facilityId, reading).catch((err) =>
+      console.warn('Failed to log telemetry to Firestore:', err)
+    );
+    saveFacilityToFirestore(facility).catch((err) =>
+      console.warn('Failed to update facility in Firestore:', err)
+    );
 
     return facility;
   }
@@ -913,6 +997,11 @@ Give a unique, authentic tone with practical industrial details. Do NOT output g
     }
 
     this.pipelineResults = items;
+    if (this.passports.length > 0) {
+      savePassportsToFirestore(this.passports).catch((err) =>
+        console.warn('Failed to save passports to Firestore:', err)
+      );
+    }
     return items;
   }
 }
