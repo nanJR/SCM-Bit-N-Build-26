@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PipelineItemResult } from '../types';
 import { ContractModal } from './ContractModal';
 import { CarbonOffsetCounter } from './CarbonOffsetCounter';
-import { TruckRouteSimulator } from './TruckRouteSimulator';
 import { formatMaterialTitleCase, getMaterialBadgeStyles } from '../utils/materials';
 import {
   Play,
@@ -44,7 +43,6 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
 }) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
   const [selectedContractItem, setSelectedContractItem] = useState<PipelineItemResult | null>(null);
-  const [selectedSimulatorDealIndex, setSelectedSimulatorDealIndex] = useState<number>(0);
 
   const toggleExpand = (idx: number) => {
     setExpandedIndex(expandedIndex === idx ? null : idx);
@@ -168,12 +166,6 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
 
           {/* Real-time Carbon & Resource Offset Counter */}
           <CarbonOffsetCounter results={results} />
-
-          {/* Interactive Truck Route & Highway GIS Simulator */}
-          <TruckRouteSimulator
-            results={results}
-            initialSelectedDealIndex={selectedSimulatorDealIndex}
-          />
 
           {/* Candidate Pair Results List */}
           <section className="space-y-4">
@@ -513,19 +505,6 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                         </div>
 
                         <div className="flex items-center gap-2 flex-wrap">
-                          <button
-                            onClick={() => {
-                              setSelectedSimulatorDealIndex(idx);
-                              const el = document.getElementById('truck-route-gis-simulator');
-                              if (el) el.scrollIntoView({ behavior: 'smooth' });
-                            }}
-                            className="px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-orange-400 hover:text-orange-300 font-semibold transition text-xs flex items-center gap-1.5 shadow-xs font-mono"
-                            title="Focus this route in the Highway GIS Truck Simulator"
-                          >
-                            <Truck className="w-3.5 h-3.5 text-orange-400" />
-                            <span>Track Truck Route</span>
-                          </button>
-
                           <button
                             onClick={() => setSelectedContractItem(r)}
                             className="px-3.5 py-1.5 rounded-lg bg-[#ff5d02] hover:bg-[#e04f00] text-white font-semibold transition text-xs flex items-center gap-1.5 shadow-xs"

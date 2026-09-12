@@ -125,7 +125,7 @@ export const TranscriptsTab: React.FC<TranscriptsTabProps> = ({
               <span className="text-[10px] text-stone-400 block mt-0.5">Private bound • Never revealed to seller</span>
             </div>
             <div className="bg-white p-3 rounded-xl border border-stone-200 shadow-2xs">
-              <span className="text-stone-500 block font-medium">Termination Reason:</span>
+              <span className="text-stone-500 block font-medium">Conclusion:</span>
               <span
                 id="transcript-termination-reason"
                 className={`font-mono font-bold text-sm ${

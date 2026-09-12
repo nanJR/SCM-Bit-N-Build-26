@@ -20,7 +20,7 @@ export function getDb(): Firestore | null {
   if (dbInstance) return dbInstance;
   try {
     const firebaseConfig = {
-      apiKey: config.apiKey,
+      apiKey: process.env.FIREBASE_API_KEY || config.apiKey,
       authDomain: config.authDomain,
       projectId: config.projectId,
       storageBucket: config.storageBucket,
