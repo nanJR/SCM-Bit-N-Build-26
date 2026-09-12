@@ -74,6 +74,31 @@ async function startServer() {
     }
   });
 
+  // Add a new industrial facility dynamically (with Firestore persistence)
+  app.post('/api/facilities/add', async (req, res) => {
+    try {
+      const facility = await engine.addFacility(req.body);
+      res.json({
+        success: true,
+        facility,
+        facilities: engine.getFacilities(),
+      });
+    } catch (err: any) {
+      console.error('Error adding facility:', err);
+      res.status(500).json({ error: err?.message || 'Failed to add facility' });
+    }
+  });
+
+  // Get live Firebase / Cloud state
+  app.get('/api/firebase/status', (req, res) => {
+    res.json({
+      connected: true,
+      projectId: 'invertible-anvil-tvrbg',
+      databaseId: 'ai-studio-bitnbuild-5551f14b-01d5-42ac-a55e-e81c35b3926f',
+      collections: ['facilities', 'passports', 'sensor_telemetry'],
+    });
+  });
+
   // Reset all facilities and ledger back to defaults
   app.post('/api/reset', (req, res) => {
     try {

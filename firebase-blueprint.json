@@ -1,0 +1,38 @@
+{
+  "entities": {
+    "facilities": {
+      "title": "Industrial Facilities",
+      "description": "Participating manufacturing plants, foundries, and authorized recyclers with KSPCB consent and XGN quotas",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique Facility ID (e.g., FAC-BLR-001)" },
+        "name": { "type": "string", "description": "Company legal entity name" },
+        "role": { "type": "string", "enum": ["seller", "buyer"], "description": "Facility role in symbiosis" },
+        "cluster": { "type": "string", "description": "Industrial zone / cluster name" },
+        "material": { "type": "string", "description": "Byproduct or raw material feed stream" },
+        "volume_tons_per_month": { "type": "number", "description": "Monthly volume in metric tons" },
+        "cost_floor_inr_per_ton": { "type": "number", "description": "Seller private minimum price per ton" },
+        "cost_ceiling_inr_per_ton": { "type": "number", "description": "Buyer private maximum price per ton" },
+        "hazardous": { "type": "boolean", "description": "Whether waste requires Form 10 hazardous manifest" },
+        "cepi_zone": { "type": "string", "description": "Critically Polluted Industrial Area classification" },
+        "gstin": { "type": "string", "description": "Karnataka Goods and Services Tax Identification Number" },
+        "kspcb_consent_id": { "type": "string", "description": "Statutory KSPCB environmental permit number" },
+        "created_at": { "type": "string", "description": "ISO timestamp of registration" }
+      },
+      "required": ["id", "name", "role", "cluster", "material", "volume_tons_per_month"]
+    },
+    "passports": {
+      "title": "Digital Waste Passports",
+      "description": "Cryptographically chained SHA-256 blocks for verified circular byproduct deals",
+      "type": "object",
+      "properties": {
+        "record_hash": { "type": "string", "description": "SHA-256 hash of this immutable block" },
+        "prev_hash": { "type": "string", "description": "SHA-256 hash of previous block in the chain" },
+        "block_number": { "type": "number", "description": "Sequential block index" },
+        "issued_at": { "type": "string", "description": "ISO timestamp when deal was ratified" },
+        "issuer": { "type": "string", "description": "Certifying authority" }
+      },
+      "required": ["record_hash", "prev_hash", "issued_at"]
+    }
+  }
+}

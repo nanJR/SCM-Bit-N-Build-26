@@ -18,6 +18,7 @@ export function App() {
   const [results, setResults] = useState<PipelineItemResult[]>([]);
   const [passports, setPassports] = useState<DigitalWastePassport[]>([]);
   const [verification, setVerification] = useState<LedgerVerification | null>(null);
+  const [hasUserVerified, setHasUserVerified] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [running, setRunning] = useState<boolean>(false);
@@ -98,6 +99,25 @@ export function App() {
     return 'Facility assessment unavailable.';
   };
 
+  const handleAddFacility = async (facilityData: Partial<Facility>) => {
+    const res = await fetch('/api/facilities/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(facilityData),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setFacilities(data.facilities || {});
+      setResults([]);
+      setPassports([]);
+      setVerification(null);
+      setHasUserVerified(false);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to onboard facility');
+    }
+  };
+
   const handleRunPipeline = async () => {
     setRunning(true);
     try {
@@ -109,6 +129,7 @@ export function App() {
         setResults(data.results || []);
         setPassports(data.passports || []);
         setVerification(data.verification || null);
+        setHasUserVerified(false);
         setSelectedTranscriptIndex(0);
       } else {
         console.error('Pipeline execution failed on server');
@@ -130,6 +151,7 @@ export function App() {
         setResults([]);
         setPassports([]);
         setVerification(null);
+        setHasUserVerified(false);
       }
     } catch (err) {
       console.error('Failed to reset:', err);
@@ -145,6 +167,9 @@ export function App() {
       if (res.ok) {
         const data = await res.json();
         setVerification(data);
+        if (data.valid) {
+          setHasUserVerified(true);
+        }
       }
     } catch (err) {
       console.error('Verification error:', err);
@@ -178,6 +203,7 @@ export function App() {
                 facilities={facilities}
                 onUpdateSensor={handleUpdateSensor}
                 onDescribeFacility={handleDescribeFacility}
+                onAddFacility={handleAddFacility}
                 onRunPipelineNav={() => setActiveTab('pipeline')}
                 onOpenStandards={() => setIsStandardsModalOpen(true)}
               />
@@ -210,6 +236,7 @@ export function App() {
                 verification={verification}
                 onVerify={handleVerifyLedger}
                 verifying={verifying}
+                hasUserVerified={hasUserVerified}
                 onNavigateMatchDeals={() => setActiveTab('pipeline')}
               />
             )}
@@ -218,30 +245,44 @@ export function App() {
       </main>
 
       <footer className="border-t border-orange-200/70 bg-white/90 backdrop-blur-xs py-6 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500 font-medium">
-          <div>
-            SCM - Swalpa Circular Maadi • Industrial Byproduct Symbiosis Network across Karnataka
+        <div className="max-w-7xl mx-auto flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500 font-medium">
+            <div>
+              SCM - Swalpa Circular Maadi • Industrial Byproduct Symbiosis Network across Karnataka
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setIsLimitationsModalOpen(true)}
+                className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-950 font-semibold border border-stone-200 transition"
+              >
+                Honest Limitations (Simulated vs Production)
+              </button>
+              <button
+                onClick={() => setIsStandardsModalOpen(true)}
+                className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-950 font-semibold border border-stone-200 transition"
+              >
+                Regulatory Rules (KSPCB / CPCB)
+              </button>
+              <button
+                onClick={() => setIsGlossaryModalOpen(true)}
+                className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-950 font-semibold border border-stone-200 transition"
+              >
+                Glossary
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              onClick={() => setIsLimitationsModalOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-950 font-semibold border border-stone-200 transition"
-            >
-              Honest Limitations (Simulated vs Production)
-            </button>
-            <button
-              onClick={() => setIsStandardsModalOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-950 font-semibold border border-stone-200 transition"
-            >
-              Regulatory Rules (KSPCB / CPCB)
-            </button>
-            <button
-              onClick={() => setIsGlossaryModalOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-950 font-semibold border border-stone-200 transition"
-            >
-              Glossary
-            </button>
+          <div className="pt-3 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-stone-400">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="font-semibold text-stone-600">Cloud Firestore Powered</span>
+              <span className="text-stone-300">•</span>
+              <span>Persistent storage for factory registry, IoT telemetry & digital waste passports</span>
+            </div>
+            <div className="font-mono text-[10px] text-stone-400">
+              Database: <span className="text-stone-600 font-semibold">ai-studio-bitnbuild-5551f14b-01d5-42ac-a55e-e81c35b3926f</span>
+            </div>
           </div>
         </div>
       </footer>

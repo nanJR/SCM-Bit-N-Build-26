@@ -26,8 +26,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Left: Minimalistic App Brand */}
         <div className="flex items-center gap-2">
           <div className="flex flex-col leading-tight">
-            <span className="font-extrabold text-sm sm:text-base text-stone-900 tracking-tight">
-              Swalpa Circular Maadi
+            <span id="nav-brand-title" className="font-extrabold text-sm sm:text-base text-stone-900 tracking-tight">
+              SCM - Swalpa Circular Maadi
             </span>
             <span className="text-[11px] sm:text-xs text-orange-600 font-semibold italic">
               Make it circular, eh?
