@@ -22,7 +22,6 @@ import {
   FlaskConical,
   FileText,
   PlusCircle,
-  Cloud,
 } from 'lucide-react';
 
 interface FacilitiesTabProps {
@@ -142,7 +141,7 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
               title="Add a custom industrial manufacturing plant or authorized recycler"
             >
               <PlusCircle className="w-4 h-4" />
-              <span>+ Onboard Factory</span>
+              <span>Onboard Factory</span>
             </button>
 
             {onOpenStandards && (
