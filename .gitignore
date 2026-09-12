@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+data/facilities.json
+data/state.json
+data/ledger/
+node_modules/
+dist/
+.env
+.env.local

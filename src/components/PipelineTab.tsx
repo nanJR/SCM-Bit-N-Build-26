@@ -1,0 +1,538 @@
+import React, { useState } from 'react';
+import { PipelineItemResult } from '../types';
+import { ContractModal } from './ContractModal';
+import {
+  Play,
+  CheckCircle2,
+  XCircle,
+  ShieldAlert,
+  ArrowRight,
+  TrendingDown,
+  Truck,
+  Hash,
+  Scale,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  Wind,
+  ShieldCheck,
+  Building2,
+  FileText,
+  FileCheck2,
+  Compass,
+  Clock,
+} from 'lucide-react';
+
+interface PipelineTabProps {
+  results: PipelineItemResult[];
+  onRunPipeline: () => Promise<void>;
+  running: boolean;
+  onSelectTranscript: (index: number) => void;
+  onViewPassport: () => void;
+}
+
+export const PipelineTab: React.FC<PipelineTabProps> = ({
+  results,
+  onRunPipeline,
+  running,
+  onSelectTranscript,
+  onViewPassport,
+}) => {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
+  const [selectedContractItem, setSelectedContractItem] = useState<PipelineItemResult | null>(null);
+
+  const toggleExpand = (idx: number) => {
+    setExpandedIndex(expandedIndex === idx ? null : idx);
+  };
+
+  const dealCount = results.filter(
+    (r) => r.negotiation.outcome === 'DEAL' && r.regulatory?.decision === 'APPROVED'
+  ).length;
+  const vetoCount = results.filter((r) => r.regulatory?.decision === 'VETOED').length;
+  const noDealCount = results.filter((r) => r.negotiation.outcome === 'NO_DEAL').length;
+  
+  const totalCo2Saved = results.reduce((acc, r) => {
+    if (r.negotiation.outcome === 'DEAL' && r.regulatory?.decision === 'APPROVED') {
+      return acc + (r.negotiation.logistics.net_co2_impact_kg || 0);
+    }
+    return acc;
+  }, 0);
+
+  const totalPm10Saved = results.reduce((acc, r) => {
+    if (r.negotiation.outcome === 'DEAL' && r.regulatory?.decision === 'APPROVED') {
+      return acc + (r.negotiation.logistics.pm10_avoided_kg || 0);
+    }
+    return acc;
+  }, 0);
+
+  return (
+    <div className="space-y-6">
+      {/* Control Banner Card - styled like the warm header cards */}
+      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-6 sm:p-8 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+          <div>
+            <div className="text-[11px] font-extrabold tracking-wider text-[#ea580c] uppercase mb-1 font-mono">
+              CIRCULAR SYMBIOSIS PIPELINE
+            </div>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight">
+              Execute Autonomous Multi-Agent Industrial Byproduct Matching
+            </h1>
+            <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
+              Matchmaker clusters candidate pairs within 60km, bilateral facility agents negotiate price via Monotonic Concession, the KSPCB Regulatory Supervisor inspects consents & hazardous certifications, and approved trades anchor to the immutable Digital Waste Passport.
+            </p>
+          </div>
+
+          <div>
+            <button
+              id="run-pipeline-btn"
+              onClick={onRunPipeline}
+              disabled={running}
+              className="bg-[#ff5d02] hover:bg-[#e04f00] text-white font-bold px-7 py-3.5 rounded-xl shadow-sm transition transform active:scale-95 disabled:opacity-50 flex items-center gap-2.5 text-sm shrink-0"
+            >
+              <Play className={`w-4 h-4 ${running ? 'animate-spin' : ''}`} />
+              {running ? 'Negotiating Circular Trades...' : '▶ Run Full Pipeline'}
+            </button>
+          </div>
+        </div>
+
+        {/* Live Step Progress when Running */}
+        {running && (
+          <div className="mt-6 p-4 rounded-2xl bg-orange-50/70 border border-orange-200 text-xs text-stone-700 animate-pulse space-y-3">
+            <div className="flex items-center gap-2 text-[#ea580c] font-bold">
+              <Sparkles className="w-4 h-4 animate-spin" />
+              <span>Agents actively communicating across shared memory & regulatory layer...</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-[11px]">
+              <div className="p-2.5 rounded-xl bg-white border border-orange-200 font-medium">
+                1. Matchmaker: Spatial Cluster & Radius (≤60km)
+              </div>
+              <div className="p-2.5 rounded-xl bg-white border border-orange-200 font-medium">
+                2. Monotonic Concession Bargaining (5 rounds)
+              </div>
+              <div className="p-2.5 rounded-xl bg-white border border-orange-200 font-medium">
+                3. KSPCB Supervisory Regulatory Audit
+              </div>
+              <div className="p-2.5 rounded-xl bg-white border border-orange-200 font-medium">
+                4. SHA-256 Waste Passport Hash Chaining
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* KPI Stats Row in warm rounded cards */}
+      {results.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="bg-white border border-orange-200/80 rounded-2xl p-4 shadow-xs">
+            <div className="text-[11px] font-semibold text-stone-500 uppercase tracking-wide font-mono">Pairs Evaluated</div>
+            <div className="text-2xl font-black text-stone-900 mt-1">{results.length}</div>
+            <div className="text-[10px] text-stone-400">Within ≤60km cluster</div>
+          </div>
+
+          <div className="bg-white border border-emerald-200 rounded-2xl p-4 shadow-xs">
+            <div className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wide font-mono">Deals Approved</div>
+            <div className="text-2xl font-black text-emerald-600 mt-1">{dealCount}</div>
+            <div className="text-[10px] text-stone-400">KSPCB compliant</div>
+          </div>
+
+          <div className="bg-white border border-amber-200 rounded-2xl p-4 shadow-xs">
+            <div className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide font-mono">KSPCB Vetoes</div>
+            <div className="text-2xl font-black text-amber-600 mt-1">{vetoCount}</div>
+            <div className="text-[10px] text-stone-400">Uncertified handler</div>
+          </div>
+
+          <div className="bg-white border border-rose-200 rounded-2xl p-4 shadow-xs">
+            <div className="text-[11px] font-semibold text-rose-700 uppercase tracking-wide font-mono">Price Gap (No Deal)</div>
+            <div className="text-2xl font-black text-rose-600 mt-1">{noDealCount}</div>
+            <div className="text-[10px] text-stone-400">Floor &gt; Ceiling</div>
+          </div>
+
+          <div className="bg-white border border-orange-200 rounded-2xl p-4 shadow-xs">
+            <div className="text-[11px] font-semibold text-[#ea580c] uppercase tracking-wide font-mono">Net CO2 Offset</div>
+            <div className="text-2xl font-black text-[#ea580c] mt-1 font-mono">{(totalCo2Saved / 1000).toFixed(1)} t</div>
+            <div className="text-[10px] text-stone-400">Virgin extraction avoided</div>
+          </div>
+
+          <div className="bg-white border border-cyan-200 rounded-2xl p-4 shadow-xs">
+            <div className="text-[11px] font-semibold text-cyan-700 uppercase tracking-wide font-mono">CSTEP PM10 Avoided</div>
+            <div className="text-2xl font-black text-cyan-700 mt-1 font-mono">{(totalPm10Saved).toFixed(0)} kg</div>
+            <div className="text-[10px] text-stone-400">Quarrying & clinker dust</div>
+          </div>
+        </div>
+      )}
+
+      {/* Candidate Pair Results List */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-stone-900">
+            Evaluated Industrial Pairings & Outcomes ({results.length})
+          </h2>
+          <span className="text-xs text-stone-500 font-mono">
+            Autonomous Monotonic Concession
+          </span>
+        </div>
+
+        {results.length === 0 && !running && (
+          <div className="text-center py-16 px-4 rounded-3xl border border-dashed border-orange-200 bg-white">
+            <Scale className="w-12 h-12 mx-auto text-orange-300 mb-3" />
+            <h3 className="text-base font-bold text-stone-800">Pipeline Ready to Run</h3>
+            <p className="text-xs sm:text-sm text-stone-500 max-w-md mx-auto mt-1 mb-5 leading-relaxed">
+              Click "Run Full Pipeline" to initiate agent discovery, bilateral bargaining rounds, KSPCB compliance verification, and ledger anchoring.
+            </p>
+            <button
+              onClick={onRunPipeline}
+              className="bg-[#ff5d02] hover:bg-[#e04f00] text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-sm transition"
+            >
+              Start Pipeline Execution
+            </button>
+          </div>
+        )}
+
+        <div className="space-y-3">
+          {results.map((r, idx) => {
+            const outcome = r.negotiation.outcome;
+            const regDecision = r.regulatory?.decision;
+
+            let statusType: 'deal' | 'vetoed' | 'nodeal' = 'nodeal';
+            if (outcome === 'DEAL') {
+              statusType = regDecision === 'VETOED' ? 'vetoed' : 'deal';
+            }
+
+            const isExpanded = expandedIndex === idx;
+
+            return (
+              <div
+                key={`${r.seller.id}-${r.buyer.id}-${idx}`}
+                className={`rounded-2xl border transition bg-white shadow-xs overflow-hidden ${
+                  statusType === 'deal'
+                    ? 'border-emerald-300 ring-1 ring-emerald-100'
+                    : statusType === 'vetoed'
+                    ? 'border-amber-300 ring-1 ring-amber-100'
+                    : 'border-stone-200'
+                }`}
+              >
+                {/* Header / Summary Bar */}
+                <div
+                  onClick={() => toggleExpand(idx)}
+                  className="p-5 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-orange-50/30 transition select-none"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div className="shrink-0">
+                      {statusType === 'deal' && (
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                          <CheckCircle2 className="w-5 h-5" />
+                        </div>
+                      )}
+                      {statusType === 'vetoed' && (
+                        <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                          <ShieldAlert className="w-5 h-5" />
+                        </div>
+                      )}
+                      {statusType === 'nodeal' && (
+                        <div className="w-10 h-10 rounded-xl bg-stone-100 text-stone-500 flex items-center justify-center">
+                          <XCircle className="w-5 h-5" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-bold text-stone-900">{r.seller.name}</span>
+                        <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
+                        <span className="text-sm font-bold text-stone-900">{r.buyer.name}</span>
+                        <span className="text-xs px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 font-mono font-medium">
+                          {r.match.material.replace(/_/g, ' ')}
+                        </span>
+                        {r.seller.hazardous && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold border border-amber-200">
+                            Hazardous
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-stone-500 mt-1 flex items-center gap-2 sm:gap-3 flex-wrap">
+                        <span>Route: {r.seller.cluster} → {r.buyer.cluster} ({r.match.route.distance_km} km)</span>
+                        <span>•</span>
+                        <span>Trade Vol: {r.negotiation.volume_tons} t/mo</span>
+                        {statusType === 'deal' && (
+                          <>
+                            <span>•</span>
+                            <span className="text-emerald-700 font-bold font-mono">
+                              Final Price: ₹{r.negotiation.final_price_inr_per_ton}/ton
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 self-end md:self-center">
+                    <span
+                      className={`text-[11px] px-3 py-1 rounded-full font-bold uppercase tracking-wider ${
+                        statusType === 'deal'
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          : statusType === 'vetoed'
+                          ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                          : 'bg-stone-100 text-stone-600 border border-stone-200'
+                      }`}
+                    >
+                      {statusType === 'deal' ? 'APPROVED DEAL' : statusType === 'vetoed' ? 'VETOED (KSPCB)' : 'NO DEAL'}
+                    </span>
+                    {isExpanded ? <ChevronUp className="w-4 h-4 text-stone-400" /> : <ChevronDown className="w-4 h-4 text-stone-400" />}
+                  </div>
+                </div>
+
+                {/* Expanded Details */}
+                {isExpanded && (
+                  <div className="p-5 border-t border-stone-100 bg-stone-50/50 space-y-4">
+                    {/* Matchmaker Assessment */}
+                    {r.match.justification && (
+                      <div className="text-xs text-stone-700 bg-white p-3.5 rounded-xl border border-stone-200 leading-relaxed">
+                        <span className="font-bold text-[#ea580c]">Matchmaker Spatial Assessment: </span>
+                        {r.match.justification}
+                      </div>
+                    )}
+
+                    {/* Limitation 1: Quality & Lab Assay Tolerance Verification */}
+                    {r.match.quality_check && r.match.quality_check.assay_certificate && (
+                      <div className="p-3.5 rounded-xl bg-white border border-stone-200 text-xs space-y-2.5 shadow-2xs">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="font-bold text-stone-800 flex items-center gap-1.5">
+                            <FileCheck2 className="w-4 h-4 text-orange-600" />
+                            <span>Material Chemistry & NABL Lab Assay: {r.match.quality_check.assay_certificate.overall_grade}</span>
+                          </div>
+                          <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-stone-100 text-stone-700">
+                            {r.match.quality_check.assay_certificate.certificate_id} ({r.match.quality_check.assay_certificate.lab_name})
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                          {r.match.quality_check.assay_certificate.parameters.map((p) => (
+                            <div key={p.name} className="p-2 rounded-lg bg-stone-50 border border-stone-200">
+                              <span className="text-stone-400 block text-[10px] truncate">{p.name}</span>
+                              <span className="font-bold font-mono text-stone-800">
+                                {p.value} {p.unit}
+                              </span>
+                              <span className="text-[9px] text-stone-400 block truncate">{p.test_standard}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center justify-between text-[11px] text-stone-600 pt-1 border-t border-stone-100">
+                          <span>{r.match.quality_check.technical_note}</span>
+                          {r.negotiation.quality_adjustment_applied ? (
+                            <span className="text-amber-700 font-bold font-mono">
+                              -{r.negotiation.quality_adjustment_applied}% Quality Haircut Deducted
+                            </span>
+                          ) : (
+                            <span className="text-emerald-700 font-semibold font-mono">100% Quality Spec Cleared</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Limitation 2: Road Logistics Corridor with Tolls and BBMP Ban */}
+                    {r.negotiation.logistics.corridor && (
+                      <div className="p-3.5 rounded-xl bg-white border border-stone-200 text-xs space-y-2.5 shadow-2xs">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="font-bold text-stone-800 flex items-center gap-1.5">
+                            <Compass className="w-4 h-4 text-blue-600" />
+                            <span>Road Freight Corridor: {r.negotiation.logistics.corridor.corridor_name}</span>
+                          </div>
+                          <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 border border-blue-200 font-bold">
+                            Window: {r.negotiation.logistics.corridor.recommended_dispatch_window}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px]">
+                          <div className="p-2.5 rounded-lg bg-stone-50 border border-stone-200">
+                            <span className="text-stone-400 block text-[10px] font-bold uppercase font-mono">Corridor Highway</span>
+                            <span className="font-bold text-stone-800 truncate block">
+                              {r.negotiation.logistics.corridor.highway_number}
+                            </span>
+                            <span className="text-[10px] text-stone-500 block">Circuity: {r.negotiation.logistics.corridor.road_circuity_factor}x • ~{r.negotiation.logistics.corridor.est_transit_minutes} mins</span>
+                          </div>
+
+                          <div className="p-2.5 rounded-lg bg-stone-50 border border-stone-200">
+                            <span className="text-stone-400 block text-[10px] font-bold uppercase font-mono">Toll Plazas & Tariff</span>
+                            <span className="font-bold text-stone-800 font-mono block">
+                              {r.negotiation.logistics.corridor.total_toll_inr > 0 ? `₹${r.negotiation.logistics.corridor.total_toll_inr} Toll Included` : 'Zero Toll Route'}
+                            </span>
+                            <span className="text-[10px] text-stone-500 block truncate">
+                              {r.negotiation.logistics.corridor.tolls.length > 0 ? r.negotiation.logistics.corridor.tolls.map((t) => t.name).join(', ') : 'State Highway'}
+                            </span>
+                          </div>
+
+                          <div className="p-2.5 rounded-lg bg-stone-50 border border-stone-200">
+                            <span className="text-stone-400 block text-[10px] font-bold uppercase font-mono">BBMP Heavy Vehicle Ban</span>
+                            <span className={`font-bold block ${r.negotiation.logistics.corridor.bbmp_peak_restriction.restricted ? 'text-amber-700' : 'text-emerald-700'}`}>
+                              {r.negotiation.logistics.corridor.bbmp_peak_restriction.restricted ? 'Peak Ban Enforced' : 'Exempt (Outer Bypass)'}
+                            </span>
+                            <span className="text-[10px] text-stone-500 block truncate">{r.negotiation.logistics.corridor.bbmp_peak_restriction.window}</span>
+                          </div>
+                        </div>
+
+                        {r.negotiation.logistics.corridor.bbmp_peak_restriction.restricted && (
+                          <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-800 flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                            <span>{r.negotiation.logistics.corridor.bbmp_peak_restriction.advisory}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Logistics & Emission Offsets */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                      <div className="p-3.5 rounded-xl bg-white border border-stone-200 shadow-2xs">
+                        <div className="text-stone-500 font-semibold flex items-center gap-1.5 mb-1">
+                          <Truck className="w-3.5 h-3.5 text-blue-600" />
+                          Logistics & Freight Total
+                        </div>
+                        <div className="font-bold text-stone-800">
+                          {r.negotiation.logistics.distance_km} km ({r.negotiation.logistics.reason})
+                        </div>
+                        <div className="text-[11px] text-stone-500 mt-1 font-mono">
+                          Freight Cost: ₹{r.negotiation.logistics.transport_cost_total_inr} (₹{r.negotiation.logistics.transport_cost_per_ton_inr}/ton)
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-white border border-stone-200 shadow-2xs">
+                        <div className="text-stone-500 font-semibold flex items-center gap-1.5 mb-1">
+                          <TrendingDown className="w-3.5 h-3.5 text-emerald-600" />
+                          Carbon & Air Quality Offset
+                        </div>
+                        <div className="font-bold text-emerald-700 font-mono">
+                          CO2 Saved: {r.negotiation.logistics.net_co2_impact_kg} kg
+                        </div>
+                        {r.negotiation.logistics.pm10_avoided_kg ? (
+                          <div className="text-[11px] text-cyan-700 mt-1 font-mono font-medium flex items-center gap-1">
+                            <Wind className="w-3 h-3" />
+                            PM10 Avoided: {r.negotiation.logistics.pm10_avoided_kg} kg
+                          </div>
+                        ) : null}
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-white border border-stone-200 shadow-2xs">
+                        <div className="text-stone-500 font-semibold flex items-center gap-1.5 mb-1">
+                          <Scale className="w-3.5 h-3.5 text-amber-600" />
+                          Negotiation Convergence
+                        </div>
+                        <div className="font-bold text-stone-800">
+                          {r.negotiation.rounds.length} rounds executed
+                        </div>
+                        <button
+                          onClick={() => onSelectTranscript(idx)}
+                          className="text-[11px] text-[#ea580c] font-semibold hover:underline mt-1 inline-block"
+                        >
+                          View round-by-round transcript →
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Limitation 3: KSPCB Regulatory Decision Section & XGN Quotas */}
+                    {r.regulatory && (
+                      <div
+                        className={`p-4 rounded-xl border text-xs leading-relaxed ${
+                          r.regulatory.decision === 'APPROVED'
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                            : 'bg-amber-50 border-amber-200 text-amber-900'
+                        }`}
+                      >
+                        <div className="font-bold flex items-center justify-between gap-1.5 mb-1 text-sm">
+                          <div className="flex items-center gap-1.5">
+                            <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                            <span>KSPCB Regulatory Supervisor: {r.regulatory.decision}</span>
+                          </div>
+                          {r.regulatory.xgn_consent_status && (
+                            <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-white border border-emerald-300 text-emerald-800">
+                              CFO Active (Exp: {r.regulatory.xgn_consent_status.seller_expiry})
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs">
+                          <span className="font-semibold text-stone-700">Rule Applied: </span>
+                          {r.regulatory.rule_applied}
+                        </div>
+
+                        {r.regulatory.xgn_quota_check && (
+                          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] bg-white/80 p-2.5 rounded-lg border border-stone-200">
+                            <div>
+                              <span className="font-bold text-stone-800 block">Seller XGN Quota Headroom:</span>
+                              <span className="text-stone-600 font-mono">
+                                Quota: {r.regulatory.xgn_quota_check.seller_check.authorized_quota_tons} T | Consumed: {r.regulatory.xgn_quota_check.seller_check.consumed_tons} T | Remaining: {r.regulatory.xgn_quota_check.seller_check.remaining_headroom_tons} T
+                              </span>
+                            </div>
+                            <div>
+                              <span className="font-bold text-stone-800 block">Buyer XGN Quota Headroom:</span>
+                              <span className="text-stone-600 font-mono">
+                                Quota: {r.regulatory.xgn_quota_check.buyer_check.authorized_quota_tons} T | Remaining: {r.regulatory.xgn_quota_check.buyer_check.remaining_headroom_tons} T
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {r.regulatory.explanation && (
+                          <div className="mt-1.5 text-stone-700 italic bg-white/70 p-2.5 rounded-lg border border-stone-200/60">
+                            "{r.regulatory.explanation}"
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Reason if NO_DEAL */}
+                    {r.negotiation.outcome === 'NO_DEAL' && (
+                      <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-900">
+                        <span className="font-bold">Bargaining Breakdown: </span>
+                        {r.negotiation.reason}
+                      </div>
+                    )}
+
+                    {/* Limitation 4: Passport Hash Link & PO / GST E-Way Bill Inspector */}
+                    {r.passport && (
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-white border border-stone-200 text-xs gap-3">
+                        <div className="flex items-center gap-2 font-mono text-stone-700">
+                          <Hash className="w-4 h-4 text-[#ea580c] shrink-0" />
+                          <span>Digital Waste Passport: </span>
+                          <span className="text-[#ea580c] font-bold">
+                            {r.passport.record_hash.slice(0, 24)}...
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setSelectedContractItem(r)}
+                            className="px-3.5 py-1.5 rounded-lg bg-[#ff5d02] hover:bg-[#e04f00] text-white font-semibold transition text-xs flex items-center gap-1.5 shadow-xs"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>View PO & GST E-Way Bill</span>
+                          </button>
+
+                          <button
+                            onClick={onViewPassport}
+                            className="px-3.5 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-800 hover:text-orange-950 font-semibold transition text-xs shrink-0"
+                          >
+                            Ledger →
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Contract & E-Way Bill Modal */}
+      {selectedContractItem && (
+        <ContractModal
+          isOpen={Boolean(selectedContractItem)}
+          onClose={() => setSelectedContractItem(null)}
+          contract={selectedContractItem.passport?.deal.contract}
+          ewayBill={selectedContractItem.passport?.deal.eway_bill}
+          hazardManifest={selectedContractItem.passport?.deal.hazard_manifest}
+        />
+      )}
+    </div>
+  );
+};

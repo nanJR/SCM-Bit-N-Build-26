@@ -1,0 +1,8 @@
+{
+  "name": "Karnataka Industrial Symbiosis",
+  "description": "Multi-agent waste-to-resource matching, monotonic concession negotiation, KSPCB regulatory review, and digital waste passport ledger.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
