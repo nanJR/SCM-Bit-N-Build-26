@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PipelineItemResult } from '../types';
 import { ContractModal } from './ContractModal';
 import {
@@ -67,150 +68,139 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Control Banner Card - styled like the warm header cards */}
-      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-6 sm:p-8 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-          <div>
-            <div className="text-[11px] font-extrabold tracking-wider text-[#ea580c] uppercase mb-1 font-mono">
-              CIRCULAR SYMBIOSIS PIPELINE
-            </div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight">
-              Execute Autonomous Multi-Agent Industrial Byproduct Matching
-            </h1>
-            <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
-              Matchmaker clusters candidate pairs within 60km, bilateral facility agents negotiate price via Monotonic Concession, the KSPCB Regulatory Supervisor inspects consents & hazardous certifications, and approved trades anchor to the immutable Digital Waste Passport.
-            </p>
+      {/* Centralized Large Control Banner Card */}
+      <section className="bg-white rounded-3xl border border-orange-200/90 p-8 sm:p-12 shadow-sm text-center max-w-4xl mx-auto">
+        <div className="max-w-2xl mx-auto space-y-4">
+          <div className="inline-block text-xs font-extrabold tracking-wider text-[#ea580c] uppercase font-mono bg-orange-50 border border-orange-200 px-3.5 py-1 rounded-full">
+            CIRCULAR DEAL MATCHMAKER
           </div>
+          
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-stone-900 tracking-tight leading-tight">
+            Match Factories & Negotiate Circular Byproduct Deals
+          </h1>
+          
+          <p className="text-sm sm:text-base text-stone-600 leading-relaxed max-w-xl mx-auto">
+            Finds factories within 60 km that can reuse each other's byproducts, negotiates a fair price in up to 5 steps, checks KSPCB environmental rules, and generates certified digital waste passports.
+          </p>
 
-          <div>
+          <div className="pt-3 flex justify-center">
             <button
               id="run-pipeline-btn"
               onClick={onRunPipeline}
               disabled={running}
-              className="bg-[#ff5d02] hover:bg-[#e04f00] text-white font-bold px-7 py-3.5 rounded-xl shadow-sm transition transform active:scale-95 disabled:opacity-50 flex items-center gap-2.5 text-sm shrink-0"
+              className="bg-[#ff5d02] hover:bg-[#e04f00] text-white font-bold px-8 py-4 rounded-2xl shadow-md hover:shadow-lg transition transform active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 text-base sm:text-lg"
             >
-              <Play className={`w-4 h-4 ${running ? 'animate-spin' : ''}`} />
-              {running ? 'Negotiating Circular Trades...' : '▶ Run Full Pipeline'}
+              <Play className={`w-5 h-5 ${running ? 'animate-spin' : ''}`} />
+              <span>{running ? 'Finding Matches & Negotiating...' : 'Find Matches & Run Deals'}</span>
             </button>
           </div>
         </div>
 
         {/* Live Step Progress when Running */}
         {running && (
-          <div className="mt-6 p-4 rounded-2xl bg-orange-50/70 border border-orange-200 text-xs text-stone-700 animate-pulse space-y-3">
+          <div className="mt-8 p-5 rounded-2xl bg-orange-50/80 border border-orange-200 text-xs sm:text-sm text-stone-700 animate-pulse space-y-4 max-w-2xl mx-auto text-left">
             <div className="flex items-center gap-2 text-[#ea580c] font-bold">
               <Sparkles className="w-4 h-4 animate-spin" />
-              <span>Agents actively communicating across shared memory & regulatory layer...</span>
+              <span>Matching factory pairs and negotiating fair deal prices...</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-[11px]">
-              <div className="p-2.5 rounded-xl bg-white border border-orange-200 font-medium">
-                1. Matchmaker: Spatial Cluster & Radius (≤60km)
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div className="p-3 rounded-xl bg-white border border-orange-200 font-medium">
+                1. Pair nearby factories within 60 km
               </div>
-              <div className="p-2.5 rounded-xl bg-white border border-orange-200 font-medium">
-                2. Monotonic Concession Bargaining (5 rounds)
+              <div className="p-3 rounded-xl bg-white border border-orange-200 font-medium">
+                2. Negotiate fair price (up to 5 rounds)
               </div>
-              <div className="p-2.5 rounded-xl bg-white border border-orange-200 font-medium">
-                3. KSPCB Supervisory Regulatory Audit
+              <div className="p-3 rounded-xl bg-white border border-orange-200 font-medium">
+                3. Check KSPCB pollution rules & permits
               </div>
-              <div className="p-2.5 rounded-xl bg-white border border-orange-200 font-medium">
-                4. SHA-256 Waste Passport Hash Chaining
+              <div className="p-3 rounded-xl bg-white border border-orange-200 font-medium">
+                4. Issue certified digital waste passport
               </div>
             </div>
           </div>
         )}
       </section>
 
-      {/* KPI Stats Row in warm rounded cards */}
+      {/* KPI Stats Row & Pairings/Outcomes - Visible ONLY after running deals */}
       {results.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div className="bg-white border border-orange-200/80 rounded-2xl p-4 shadow-xs">
-            <div className="text-[11px] font-semibold text-stone-500 uppercase tracking-wide font-mono">Pairs Evaluated</div>
-            <div className="text-2xl font-black text-stone-900 mt-1">{results.length}</div>
-            <div className="text-[10px] text-stone-400">Within ≤60km cluster</div>
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="bg-white border border-orange-200/80 rounded-2xl p-4 shadow-xs">
+              <div className="text-[11px] font-semibold text-stone-500 uppercase tracking-wide font-mono">Pairs Evaluated</div>
+              <div className="text-2xl font-black text-stone-900 mt-1">{results.length}</div>
+              <div className="text-[10px] text-stone-400">Within ≤60km cluster</div>
+            </div>
+
+            <div className="bg-white border border-emerald-200 rounded-2xl p-4 shadow-xs">
+              <div className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wide font-mono">Deals Approved</div>
+              <div className="text-2xl font-black text-emerald-600 mt-1">{dealCount}</div>
+              <div className="text-[10px] text-stone-400">KSPCB compliant</div>
+            </div>
+
+            <div className="bg-white border border-amber-200 rounded-2xl p-4 shadow-xs">
+              <div className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide font-mono">KSPCB Vetoes</div>
+              <div className="text-2xl font-black text-amber-600 mt-1">{vetoCount}</div>
+              <div className="text-[10px] text-stone-400">Uncertified handler</div>
+            </div>
+
+            <div className="bg-white border border-rose-200 rounded-2xl p-4 shadow-xs">
+              <div className="text-[11px] font-semibold text-rose-700 uppercase tracking-wide font-mono">Price Gap (No Deal)</div>
+              <div className="text-2xl font-black text-rose-600 mt-1">{noDealCount}</div>
+              <div className="text-[10px] text-stone-400">Floor &gt; Ceiling</div>
+            </div>
+
+            <div className="bg-white border border-orange-200 rounded-2xl p-4 shadow-xs">
+              <div className="text-[11px] font-semibold text-[#ea580c] uppercase tracking-wide font-mono">Net CO2 Offset</div>
+              <div className="text-2xl font-black text-[#ea580c] mt-1 font-mono">{(totalCo2Saved / 1000).toFixed(1)} t</div>
+              <div className="text-[10px] text-stone-400">Virgin extraction avoided</div>
+            </div>
+
+            <div className="bg-white border border-cyan-200 rounded-2xl p-4 shadow-xs">
+              <div className="text-[11px] font-semibold text-cyan-700 uppercase tracking-wide font-mono">CSTEP PM10 Avoided</div>
+              <div className="text-2xl font-black text-cyan-700 mt-1 font-mono">{(totalPm10Saved).toFixed(0)} kg</div>
+              <div className="text-[10px] text-stone-400">Quarrying & clinker dust</div>
+            </div>
           </div>
 
-          <div className="bg-white border border-emerald-200 rounded-2xl p-4 shadow-xs">
-            <div className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wide font-mono">Deals Approved</div>
-            <div className="text-2xl font-black text-emerald-600 mt-1">{dealCount}</div>
-            <div className="text-[10px] text-stone-400">KSPCB compliant</div>
-          </div>
+          {/* Candidate Pair Results List */}
+          <section className="space-y-4">
+            <div className="text-center py-2">
+              <h2 className="text-lg sm:text-2xl font-bold text-stone-900">
+                Evaluated Industrial Pairings & Outcomes ({results.length})
+              </h2>
+              <p className="text-xs text-stone-500 font-mono mt-0.5">
+                Autonomous Monotonic Concession Protocol
+              </p>
+            </div>
 
-          <div className="bg-white border border-amber-200 rounded-2xl p-4 shadow-xs">
-            <div className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide font-mono">KSPCB Vetoes</div>
-            <div className="text-2xl font-black text-amber-600 mt-1">{vetoCount}</div>
-            <div className="text-[10px] text-stone-400">Uncertified handler</div>
-          </div>
+            <div className="space-y-3">
+              <AnimatePresence mode="popLayout">
+                {results.map((r, idx) => {
+                  const outcome = r.negotiation.outcome;
+                  const regDecision = r.regulatory?.decision;
 
-          <div className="bg-white border border-rose-200 rounded-2xl p-4 shadow-xs">
-            <div className="text-[11px] font-semibold text-rose-700 uppercase tracking-wide font-mono">Price Gap (No Deal)</div>
-            <div className="text-2xl font-black text-rose-600 mt-1">{noDealCount}</div>
-            <div className="text-[10px] text-stone-400">Floor &gt; Ceiling</div>
-          </div>
+                  let statusType: 'deal' | 'vetoed' | 'nodeal' = 'nodeal';
+                  if (outcome === 'DEAL') {
+                    statusType = regDecision === 'VETOED' ? 'vetoed' : 'deal';
+                  }
 
-          <div className="bg-white border border-orange-200 rounded-2xl p-4 shadow-xs">
-            <div className="text-[11px] font-semibold text-[#ea580c] uppercase tracking-wide font-mono">Net CO2 Offset</div>
-            <div className="text-2xl font-black text-[#ea580c] mt-1 font-mono">{(totalCo2Saved / 1000).toFixed(1)} t</div>
-            <div className="text-[10px] text-stone-400">Virgin extraction avoided</div>
-          </div>
+                  const isExpanded = expandedIndex === idx;
 
-          <div className="bg-white border border-cyan-200 rounded-2xl p-4 shadow-xs">
-            <div className="text-[11px] font-semibold text-cyan-700 uppercase tracking-wide font-mono">CSTEP PM10 Avoided</div>
-            <div className="text-2xl font-black text-cyan-700 mt-1 font-mono">{(totalPm10Saved).toFixed(0)} kg</div>
-            <div className="text-[10px] text-stone-400">Quarrying & clinker dust</div>
-          </div>
-        </div>
-      )}
-
-      {/* Candidate Pair Results List */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-stone-900">
-            Evaluated Industrial Pairings & Outcomes ({results.length})
-          </h2>
-          <span className="text-xs text-stone-500 font-mono">
-            Autonomous Monotonic Concession
-          </span>
-        </div>
-
-        {results.length === 0 && !running && (
-          <div className="text-center py-16 px-4 rounded-3xl border border-dashed border-orange-200 bg-white">
-            <Scale className="w-12 h-12 mx-auto text-orange-300 mb-3" />
-            <h3 className="text-base font-bold text-stone-800">Pipeline Ready to Run</h3>
-            <p className="text-xs sm:text-sm text-stone-500 max-w-md mx-auto mt-1 mb-5 leading-relaxed">
-              Click "Run Full Pipeline" to initiate agent discovery, bilateral bargaining rounds, KSPCB compliance verification, and ledger anchoring.
-            </p>
-            <button
-              onClick={onRunPipeline}
-              className="bg-[#ff5d02] hover:bg-[#e04f00] text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-sm transition"
-            >
-              Start Pipeline Execution
-            </button>
-          </div>
-        )}
-
-        <div className="space-y-3">
-          {results.map((r, idx) => {
-            const outcome = r.negotiation.outcome;
-            const regDecision = r.regulatory?.decision;
-
-            let statusType: 'deal' | 'vetoed' | 'nodeal' = 'nodeal';
-            if (outcome === 'DEAL') {
-              statusType = regDecision === 'VETOED' ? 'vetoed' : 'deal';
-            }
-
-            const isExpanded = expandedIndex === idx;
-
-            return (
-              <div
-                key={`${r.seller.id}-${r.buyer.id}-${idx}`}
-                className={`rounded-2xl border transition bg-white shadow-xs overflow-hidden ${
-                  statusType === 'deal'
-                    ? 'border-emerald-300 ring-1 ring-emerald-100'
-                    : statusType === 'vetoed'
-                    ? 'border-amber-300 ring-1 ring-amber-100'
-                    : 'border-stone-200'
-                }`}
-              >
+                  return (
+                    <motion.div
+                      key={`${r.seller.id}-${r.buyer.id}-${idx}`}
+                      initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.28, delay: idx * 0.04 }}
+                      className={`rounded-2xl border transition bg-white shadow-xs overflow-hidden ${
+                        statusType === 'deal'
+                          ? 'border-emerald-300 ring-1 ring-emerald-100'
+                          : statusType === 'vetoed'
+                          ? 'border-amber-300 ring-1 ring-amber-100'
+                          : 'border-stone-200'
+                      }`}
+                    >
                 {/* Header / Summary Bar */}
                 <div
                   onClick={() => toggleExpand(idx)}
@@ -282,9 +272,16 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                 </div>
 
                 {/* Expanded Details */}
-                {isExpanded && (
-                  <div className="p-5 border-t border-stone-100 bg-stone-50/50 space-y-4">
-                    {/* Matchmaker Assessment */}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.22, ease: 'easeInOut' }}
+                      className="p-5 border-t border-stone-100 bg-stone-50/50 space-y-4 overflow-hidden"
+                    >
+                      {/* Matchmaker Assessment */}
                     {r.match.justification && (
                       <div className="text-xs text-stone-700 bg-white p-3.5 rounded-xl border border-stone-200 leading-relaxed">
                         <span className="font-bold text-[#ea580c]">Matchmaker Spatial Assessment: </span>
@@ -515,13 +512,17 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                         </div>
                       </div>
                     )}
-                  </div>
+                  </motion.div>
                 )}
-              </div>
+                </AnimatePresence>
+              </motion.div>
             );
           })}
+          </AnimatePresence>
         </div>
       </section>
+      </>
+      )}
 
       {/* Contract & E-Way Bill Modal */}
       {selectedContractItem && (

@@ -704,6 +704,22 @@ class SymbiosisEngine {
     this.facilities = getDefaultFacilities();
     this.passports = [];
     this.pipelineResults = [];
+    this.loadPassportsFromFile();
+  }
+
+  loadPassportsFromFile() {
+    try {
+      const filePath = path.join(process.cwd(), 'data', 'waste_passports.json');
+      if (fs.existsSync(filePath)) {
+        const raw = fs.readFileSync(filePath, 'utf-8');
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          this.passports = parsed;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load passports from local JSON file:', err);
+    }
   }
 
   reset() {
@@ -740,14 +756,40 @@ class SymbiosisEngine {
   async describeFacility(facilityId: string): Promise<string> {
     const f = this.facilities[facilityId];
     if (!f) return '';
-    const situation =
-      f.role === 'seller'
-        ? `${f.name} in ${f.cluster} generates ${f.volume_tons_per_month} tons/month of ${f.material}. Currently seeking compliant byproduct valorization.`
-        : `${f.name} in ${f.cluster} requires ${f.volume_tons_per_month} tons/month of ${f.material} as alternative secondary raw material.`;
 
-    const system =
-      'You are an MSME facility agent in an industrial symbiosis network in Karnataka, India. Describe your situation in ONE short, plain sentence as if speaking for the facility. Do not invent numbers beyond what is given.';
-    return askGemini(system, situation, 100);
+    const perspectives = [
+      'Focus primarily on your current storage space constraints, loading bay logistics, and local truck route conditions in Karnataka.',
+      'Focus on the economic margin comparison between virgin procurement vs secondary byproduct utilization, considering current Karnataka market prices.',
+      'Focus on environmental compliance, KSPCB XGN consent quota headroom, and zero-landfill targets.',
+      'Focus on recent quality assay readings, moisture sensitivity, and how contamination risks impact your processing efficiency.',
+    ];
+    const chosenPerspective = perspectives[Math.floor(Math.random() * perspectives.length)];
+    const timeSalt = Date.now().toString(36);
+
+    const situation = `
+Facility Profile:
+- Name: ${f.name}
+- Industrial Cluster: ${f.cluster} Industrial Area, Karnataka
+- Role: ${f.role === 'seller' ? 'Waste/Byproduct Generator (Seller)' : 'Industrial Off-taker / Recycler (Buyer)'}
+- Material: ${f.material.replace(/_/g, ' ')}
+- Monthly Volume: ${f.volume_tons_per_month} metric tons/month
+- Pricing Threshold: ${f.role === 'seller' ? `Minimum acceptable cost floor: ₹${f.cost_floor_inr_per_ton ?? 'Negotiable'}/ton` : `Maximum acceptable cost ceiling: ₹${f.cost_ceiling_inr_per_ton ?? 'Negotiable'}/ton`}
+- Hazardous Profile: ${f.hazardous ? 'Hazardous (Requires Form 10 / TSDF Manifest)' : 'Non-Hazardous Industrial Byproduct'}
+- KSPCB Consent ID: ${f.kspcb_consent_id || 'KSPCB/Consent/Pending'}
+- Current Quota Status: ${f.xgn_details ? `Quota ${f.xgn_details.authorized_monthly_quota_tons} T/mo (${f.xgn_details.current_month_consumed_tons} T consumed, valid till ${f.xgn_details.valid_till})` : 'Standard consent'}
+- Sensor / Quality State: Moisture ${f.sensor_adjustment?.moisture_pct ?? 10}%, Contamination: ${f.sensor_adjustment?.contamination_flag ? 'Detected' : 'Clear'}
+- Perspective Angle for this update: ${chosenPerspective}
+- Timestamp Token: ${timeSalt}
+`.trim();
+
+    const system = `You are the Plant Operations & Circular Byproduct Lead at ${f.name} in ${f.cluster}, Karnataka.
+Write a conversational, pragmatic, first-person operational briefing (2 engaging paragraphs) speaking directly as the plant lead.
+Explain:
+1. Your immediate factory floor reality: current volume (${f.volume_tons_per_month} tons of ${f.material.replace(/_/g, ' ')}), storage space, quality/moisture, and why circular exchange matters right now.
+2. Your commercial & logistics terms: pricing stance (around ₹${f.role === 'seller' ? f.cost_floor_inr_per_ton : f.cost_ceiling_inr_per_ton}/ton), transport along Karnataka road corridors (e.g., NICE Road, Tumkur Road, Mysore Road, or Peenya freight restrictions), and KSPCB permit readiness.
+Give a unique, authentic tone with practical industrial details. Do NOT output generic one-line summaries.`;
+
+    return askGemini(system, situation, 650, 0.85);
   }
 
   issuePassport(deal: DigitalWastePassport['deal']): DigitalWastePassport {

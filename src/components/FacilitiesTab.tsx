@@ -109,40 +109,43 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Top Banner Box - Clean Warm Header matching reference image */}
-      <section className="bg-gradient-to-r from-orange-50/90 via-amber-50/50 to-orange-50/80 rounded-2xl sm:rounded-3xl border border-orange-200/80 p-6 sm:p-8 shadow-sm">
+      {/* Top Banner Box - Minimalistic Header */}
+      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-orange-800 text-[11px] font-bold tracking-wider uppercase mb-2">
-              <Building2 className="w-3.5 h-3.5 text-orange-600" />
-              Karnataka State Pollution Control Board • Industrial Byproduct Portal
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[11px] font-bold text-orange-700 uppercase tracking-wider bg-orange-100 px-2.5 py-0.5 rounded-full">
+                Karnataka Factory Network
+              </span>
+              <span className="text-xs text-stone-500">16 registered plants & authorized recyclers</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-              Industrial Symbiosis & Waste Exchange Dashboard
+            <h1 className="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight">
+              Factories & Recyclers Directory
             </h1>
-            <p className="text-sm text-stone-600 mt-2 max-w-3xl leading-relaxed">
-              Autonomous multi-agent platform connecting registered industrial units across{' '}
-              <strong className="text-stone-800">Peenya, Bidadi, Dobaspet, Harohalli, Whitefield, and Yelahanka</strong>. 
-              Featuring real authorized recyclers (Rock Crystals C&D, Century Refineries, VIWA Eco-Club CETP) and KSPCB regulatory oversight under C&D Rules 2016 and Hazardous Waste Rules 2016.
+            <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-4xl leading-normal">
+              Connect waste-producing factories across Karnataka with authorized recyclers to turn industrial byproducts into secondary raw materials.
             </p>
           </div>
-          {onRunPipelineNav && (
-            <div className="shrink-0">
+          
+          <div className="flex items-center gap-2 shrink-0 self-start md:self-center">
+            {onOpenStandards && (
               <button
-                onClick={onRunPipelineNav}
-                className="bg-[#ff5d02] hover:bg-[#e04f00] text-white font-semibold px-6 py-3 rounded-xl shadow-sm transition flex items-center gap-2 text-sm"
+                id="header-rules-btn"
+                onClick={onOpenStandards}
+                className="bg-white hover:bg-orange-50 border border-orange-200 hover:border-orange-300 text-stone-800 hover:text-orange-950 font-bold px-5 py-2.5 rounded-xl text-sm shadow-xs transition flex items-center justify-center gap-2 w-full sm:w-auto"
+                title="View KSPCB, CPCB C&D 2016 and environmental standards"
               >
-                <span>Run Matchmaker & Pipeline</span>
-                <ExternalLink className="w-4 h-4" />
+                <FileCheck2 className="w-4 h-4 text-orange-600" />
+                <span>Rules & Standards</span>
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </section>
 
       {/* Box 1: Search & Filter Box (matching "FIND MY DETAILS / Search by Student ID" in reference) */}
       <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-6 shadow-sm">
-        <div className="text-[11px] font-extrabold tracking-wider text-[#ea580c] uppercase mb-1 font-mono">
+        <div className="text-xs font-black tracking-wider text-[#ea580c] uppercase mb-1.5 font-mono">
           DIRECTORY SEARCH
         </div>
         <h2 className="text-lg sm:text-xl font-bold text-stone-900 mb-1">
@@ -234,7 +237,7 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
       <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
           <div>
-            <div className="text-[11px] font-extrabold tracking-wider text-[#ea580c] uppercase mb-1 font-mono">
+            <div className="text-xs font-black tracking-wider text-[#ea580c] uppercase mb-1.5 font-mono">
               IOT TELEMETRY & CAAQMS TRIGGER
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-stone-900">
@@ -317,30 +320,6 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
         )}
       </section>
 
-      {/* Box 3: Regulatory & C&D Standards Card (matching "CIRCULARS / Important Circulars" in reference) */}
-      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="text-[11px] font-extrabold tracking-wider text-[#ea580c] uppercase mb-1 font-mono">
-            COMPLIANCE & STATUTORY RULES
-          </div>
-          <h2 className="text-lg sm:text-xl font-bold text-stone-900">
-            KSPCB Authorizations & CPCB C&D Management Rules 2016
-          </h2>
-          <p className="text-xs sm:text-sm text-stone-500 max-w-2xl mt-1">
-            Governed by BIS IS:383:2016 (Recycled Concrete Aggregate), MoEFCC Fly Ash Notification SO 5481(E), and Hazardous Waste Rules 2016 (Schedule II & IV).
-          </p>
-        </div>
-        {onOpenStandards && (
-          <button
-            onClick={onOpenStandards}
-            className="bg-[#ff5d02] hover:bg-[#e04f00] text-white font-semibold px-6 py-2.5 rounded-xl text-sm shadow-sm transition flex items-center justify-center gap-2 shrink-0"
-          >
-            <FileCheck2 className="w-4 h-4" />
-            <span>View Regulatory Standards</span>
-          </button>
-        )}
-      </section>
-
       {/* Facility Grid Cards */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
@@ -379,10 +358,8 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
                 </h3>
 
                 <div className="flex items-center gap-1 text-xs text-stone-500 mt-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#ff5d02]" />
-                  <span>{f.cluster} Cluster</span>
-                  <span className="text-stone-300">•</span>
-                  <span className="font-mono text-[11px]">[{f.lat.toFixed(2)}, {f.lon.toFixed(2)}]</span>
+                  <MapPin className="w-3.5 h-3.5 text-[#ff5d02] shrink-0" />
+                  <span>{f.cluster} Industrial Area</span>
                 </div>
 
                 {f.gstin && (
@@ -392,9 +369,17 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
                 )}
 
                 {f.kspcb_consent_id && (
-                  <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-stone-50 border border-stone-200 text-[11px] font-mono text-stone-700">
-                    <FileCheck2 className="w-3 h-3 text-orange-600" />
-                    <span>{f.kspcb_consent_id}</span>
+                  <div className="mt-2 p-2 rounded-xl bg-stone-50 border border-stone-200/80 text-stone-700">
+                    <div className="flex items-center gap-1.5 text-[11px]">
+                      <FileCheck2 className="w-3.5 h-3.5 text-orange-600 shrink-0" />
+                      <span className="font-semibold text-stone-800">KSPCB Permit / Consent ID:</span>
+                    </div>
+                    <div className="font-mono text-[11px] font-bold text-stone-900 mt-0.5 pl-5">
+                      {f.kspcb_consent_id}
+                    </div>
+                    <div className="text-[10px] text-stone-500 mt-0.5 pl-5 leading-tight">
+                      (Official statutory environmental permit issued by Karnataka State Pollution Control Board)
+                    </div>
                   </div>
                 )}
 
@@ -403,7 +388,7 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
                   <div className="mt-2.5 p-2.5 rounded-xl bg-orange-50/50 border border-orange-200/70 text-xs space-y-1.5">
                     <div className="flex items-center justify-between text-[10px] font-mono">
                       <span className="font-bold text-stone-700 uppercase">
-                        XGN Quota ({f.xgn_details.category} Category)
+                        XGN Quota ({f.xgn_details.consent_type || f.xgn_details.category || 'Consent'})
                       </span>
                       <span className="text-stone-500">Exp: {f.xgn_details.valid_till}</span>
                     </div>
@@ -513,8 +498,23 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
 
               <div className="mt-4 pt-3 border-t border-stone-100">
                 {descriptionMap[f.id] ? (
-                  <div className="p-2.5 rounded-xl bg-orange-50/70 border border-orange-200 text-xs text-stone-800 italic leading-relaxed mb-2">
-                    "{descriptionMap[f.id]}"
+                  <div className="p-3.5 rounded-2xl bg-orange-50/70 border border-orange-200 text-xs text-stone-800 space-y-2 mb-2.5 shadow-2xs">
+                    <div className="flex items-center justify-between border-b border-orange-200/60 pb-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-orange-800 font-mono flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-orange-600" />
+                        Plant Lead Operational Briefing
+                      </span>
+                      <button
+                        onClick={() => handleDescribe(f.id)}
+                        disabled={explainingId === f.id}
+                        className="text-[10px] text-orange-700 hover:text-orange-950 font-semibold underline disabled:opacity-50"
+                      >
+                        {explainingId === f.id ? 'Refreshing...' : 'Get Fresh Angle'}
+                      </button>
+                    </div>
+                    <p className="text-stone-700 text-xs leading-relaxed whitespace-pre-line">
+                      {descriptionMap[f.id]}
+                    </p>
                   </div>
                 ) : null}
 
@@ -524,12 +524,42 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
                   className="w-full py-2 px-3 rounded-xl bg-stone-100 hover:bg-orange-100 text-stone-800 hover:text-orange-950 font-semibold text-xs transition flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-orange-600" />
-                  <span>{explainingId === f.id ? 'Consulting Agent...' : 'Consult Facility Agent'}</span>
+                  <span>
+                    {explainingId === f.id
+                      ? 'Consulting Plant Lead...'
+                      : descriptionMap[f.id]
+                      ? 'Consult Again (Unique Response)'
+                      : 'Consult Facility Agent'}
+                  </span>
                 </button>
               </div>
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Compliance & Statutory Rules (Positioned at the bottom of the page) */}
+      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="text-xs font-black tracking-wider text-[#ea580c] uppercase mb-1.5 font-mono">
+            COMPLIANCE & STATUTORY RULES
+          </div>
+          <h2 className="text-lg sm:text-xl font-bold text-stone-900">
+            KSPCB Authorizations & CPCB C&D Management Rules 2016
+          </h2>
+          <p className="text-xs sm:text-sm text-stone-500 max-w-2xl mt-1">
+            Governed by BIS IS:383:2016 (Recycled Concrete Aggregate), MoEFCC Fly Ash Notification SO 5481(E), and Hazardous Waste Rules 2016 (Schedule II & IV).
+          </p>
+        </div>
+        {onOpenStandards && (
+          <button
+            onClick={onOpenStandards}
+            className="bg-[#ff5d02] hover:bg-[#e04f00] text-white font-semibold px-6 py-2.5 rounded-xl text-sm shadow-sm transition flex items-center justify-center gap-2 shrink-0"
+          >
+            <FileCheck2 className="w-4 h-4" />
+            <span>View Regulatory Standards</span>
+          </button>
+        )}
       </section>
     </div>
   );

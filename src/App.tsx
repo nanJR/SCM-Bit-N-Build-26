@@ -5,11 +5,15 @@ import { PipelineTab } from './components/PipelineTab';
 import { TranscriptsTab } from './components/TranscriptsTab';
 import { LedgerTab } from './components/LedgerTab';
 import { ArchitectureStandardsModal } from './components/ArchitectureStandardsModal';
+import { HonestLimitationsModal } from './components/HonestLimitationsModal';
+import { GlossaryModal } from './components/GlossaryModal';
 import { DigitalWastePassport, Facility, LedgerVerification, PipelineItemResult } from './types';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'facilities' | 'pipeline' | 'transcripts' | 'ledger'>('facilities');
   const [isStandardsModalOpen, setIsStandardsModalOpen] = useState<boolean>(false);
+  const [isLimitationsModalOpen, setIsLimitationsModalOpen] = useState<boolean>(false);
+  const [isGlossaryModalOpen, setIsGlossaryModalOpen] = useState<boolean>(false);
   const [facilities, setFacilities] = useState<Record<string, Facility>>({});
   const [results, setResults] = useState<PipelineItemResult[]>([]);
   const [passports, setPassports] = useState<DigitalWastePassport[]>([]);
@@ -157,6 +161,8 @@ export function App() {
         onReset={handleReset}
         resetting={resetting}
         onOpenStandards={() => setIsStandardsModalOpen(true)}
+        onOpenLimitations={() => setIsLimitationsModalOpen(true)}
+        onOpenGlossary={() => setIsGlossaryModalOpen(true)}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -172,6 +178,8 @@ export function App() {
                 facilities={facilities}
                 onUpdateSensor={handleUpdateSensor}
                 onDescribeFacility={handleDescribeFacility}
+                onRunPipelineNav={() => setActiveTab('pipeline')}
+                onOpenStandards={() => setIsStandardsModalOpen(true)}
               />
             )}
 
@@ -202,19 +210,55 @@ export function App() {
                 verification={verification}
                 onVerify={handleVerifyLedger}
                 verifying={verifying}
+                onNavigateMatchDeals={() => setActiveTab('pipeline')}
               />
             )}
           </>
         )}
       </main>
 
-      <footer className="border-t border-orange-200/70 bg-white/80 backdrop-blur-xs py-5 text-center text-xs text-stone-500 font-medium">
-        Karnataka Industrial Symbiosis Multi-Agent Network • Peenya, Bidadi, Dobaspet, Harohalli, Tumkur & Vijayanagar Clusters • Aligned with KSPCB & CSTEP Clean Air Framework
+      <footer className="border-t border-orange-200/70 bg-white/90 backdrop-blur-xs py-6 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500 font-medium">
+          <div>
+            SCM - Swalpa Circular Maadi • Industrial Byproduct Symbiosis Network across Karnataka
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => setIsLimitationsModalOpen(true)}
+              className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-950 font-semibold border border-stone-200 transition"
+            >
+              Honest Limitations (Simulated vs Production)
+            </button>
+            <button
+              onClick={() => setIsStandardsModalOpen(true)}
+              className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-950 font-semibold border border-stone-200 transition"
+            >
+              Regulatory Rules (KSPCB / CPCB)
+            </button>
+            <button
+              onClick={() => setIsGlossaryModalOpen(true)}
+              className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-950 font-semibold border border-stone-200 transition"
+            >
+              Glossary
+            </button>
+          </div>
+        </div>
       </footer>
 
       <ArchitectureStandardsModal
         isOpen={isStandardsModalOpen}
         onClose={() => setIsStandardsModalOpen(false)}
+      />
+
+      <HonestLimitationsModal
+        isOpen={isLimitationsModalOpen}
+        onClose={() => setIsLimitationsModalOpen(false)}
+      />
+
+      <GlossaryModal
+        isOpen={isGlossaryModalOpen}
+        onClose={() => setIsGlossaryModalOpen(false)}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 {
-  "name": "Karnataka Industrial Symbiosis",
-  "description": "Multi-agent waste-to-resource matching, monotonic concession negotiation, KSPCB regulatory review, and digital waste passport ledger.",
+  "name": "SCM - Swalpa Circular Maadi (Make it circular, eh?)",
+  "description": "Industrial waste-to-resource matching, deal negotiation, and digital waste passports for Karnataka factories.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

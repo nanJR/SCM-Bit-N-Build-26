@@ -19,9 +19,9 @@ export const TranscriptsTab: React.FC<TranscriptsTabProps> = ({
     return (
       <div className="text-center py-20 px-4 rounded-3xl border border-dashed border-orange-200 bg-white">
         <FileText className="w-12 h-12 mx-auto text-orange-300 mb-3" />
-        <h3 className="text-base font-bold text-stone-800">No Bilateral Transcripts Available</h3>
+        <h3 className="text-base font-bold text-stone-800">No Deal Negotiations Yet</h3>
         <p className="text-xs sm:text-sm text-stone-500 mt-1 max-w-md mx-auto leading-relaxed">
-          Run the multi-agent pipeline first to generate autonomous agent bargaining transcripts and monotonic price convergence steps.
+          Click "Match Deals" to run the matchmaker and see how factories negotiate fair prices round by round.
         </p>
       </div>
     );
@@ -35,24 +35,24 @@ export const TranscriptsTab: React.FC<TranscriptsTabProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Banner Box */}
-      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-6 shadow-sm">
+      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="text-[11px] font-extrabold tracking-wider text-[#ea580c] uppercase mb-1 font-mono">
-              BARGAINING PROTOCOL TRANSCRIPTS
+              FACTORY DEAL TALKS
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight flex items-center gap-2">
-              <span>Monotonic Concession Protocol Transcripts</span>
+              <span>Step-by-Step Price Negotiations</span>
             </h1>
             <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
-              Deterministic concession math guarantees price convergence within 5 rounds without deadlock, while LLM agents provide natural-language industrial justifications.
+              Watch buyer and seller factories exchange bids, adjust for transport distances and moisture, and agree on a fair price in up to 5 rounds.
             </p>
           </div>
 
           {/* Pair selector dropdown */}
           <div className="w-full md:w-88 shrink-0">
             <label className="block text-xs font-semibold text-stone-700 mb-1">
-              Select Industrial Pair Transcript
+              Select Factory Conversation:
             </label>
             <select
               id="transcript-pair-select"

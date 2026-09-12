@@ -65,6 +65,7 @@ export interface LogisticsCorridor {
 export interface XgnConsentInfo {
   consent_id: string;
   consent_type: 'Red-CFO' | 'Orange-CFO' | 'Green-CFO' | 'C&D-Auth';
+  category?: string;
   valid_till: string;
   is_active: boolean;
   authorized_monthly_quota_tons: number;
