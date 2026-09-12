@@ -1,5 +1,6 @@
 import React from 'react';
-import { RotateCcw, Factory, Play, MessageSquareText, BookOpen, ShieldCheck, AlertCircle, HelpCircle } from 'lucide-react';
+import { RotateCcw, Factory, Play, MessageSquareText, BookOpen, ShieldCheck, AlertCircle, HelpCircle, TrendingDown, Droplets } from 'lucide-react';
+import { PipelineItemResult } from '../types';
 
 interface NavbarProps {
   activeTab: 'facilities' | 'pipeline' | 'transcripts' | 'ledger';
@@ -9,6 +10,7 @@ interface NavbarProps {
   onOpenStandards?: () => void;
   onOpenLimitations?: () => void;
   onOpenGlossary?: () => void;
+  results?: PipelineItemResult[];
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -19,7 +21,24 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenStandards,
   onOpenLimitations,
   onOpenGlossary,
+  results = [],
 }) => {
+  const approvedDeals = results.filter(
+    (r) => r.negotiation.outcome === 'DEAL' && r.regulatory?.decision === 'APPROVED'
+  );
+  const totalCo2Kg = approvedDeals.reduce(
+    (acc, r) => acc + (r.negotiation.logistics.net_co2_impact_kg || 0),
+    0
+  );
+  const sandSavedTons = approvedDeals
+    .filter((r) =>
+      ['recycled_concrete_aggregate', 'demolition_rubble', 'steel_slag'].includes(
+        r.match.material
+      )
+    )
+    .reduce((acc, r) => acc + (r.negotiation.volume_tons || 0), 0);
+  const sandSavedLiters = sandSavedTons * 625;
+
   return (
     <header className="sticky top-2.5 z-50 px-3 sm:px-6">
       <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-md border border-orange-200/80 rounded-2xl sm:rounded-full shadow-[0_4px_20px_rgba(234,88,12,0.06)] px-3.5 sm:px-5 py-2 flex flex-wrap items-center justify-between gap-2.5">
@@ -34,6 +53,26 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Center: Live Ecological Counter (Visible when deals approved) */}
+        {approvedDeals.length > 0 && (
+          <button
+            onClick={() => setActiveTab('pipeline')}
+            className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 text-[11px] font-mono font-bold transition shadow-2xs group"
+            title="Click to view full Karnataka Carbon & Resource Telematics"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="flex items-center gap-1">
+              <TrendingDown className="w-3 h-3 text-emerald-600" />
+              {(totalCo2Kg / 1000).toFixed(1)} t CO₂ Avoided
+            </span>
+            <span className="text-emerald-300">•</span>
+            <span className="flex items-center gap-1 text-blue-800">
+              <Droplets className="w-3 h-3 text-blue-600" />
+              {sandSavedLiters >= 1000 ? `${(sandSavedLiters / 1000).toFixed(0)}k` : sandSavedLiters} L Sand Saved
+            </span>
+          </button>
+        )}
 
         {/* Right: Nav Tabs & Reset Action grouped together at rightmost */}
         <div className="flex items-center gap-2">
