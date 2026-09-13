@@ -1,16 +1,18 @@
 import React from 'react';
-import { RotateCcw, Factory, Play, MessageSquareText, BookOpen, ShieldCheck, AlertCircle, HelpCircle, TrendingDown, Droplets } from 'lucide-react';
+import { RotateCcw, Factory, Play, MessageSquareText, BookOpen, ShieldCheck, AlertCircle, HelpCircle, TrendingDown, Droplets, Truck, Sun, Moon } from 'lucide-react';
 import { PipelineItemResult } from '../types';
 
 interface NavbarProps {
-  activeTab: 'facilities' | 'pipeline' | 'transcripts' | 'ledger';
-  setActiveTab: (tab: 'facilities' | 'pipeline' | 'transcripts' | 'ledger') => void;
+  activeTab: 'facilities' | 'fleet' | 'pipeline' | 'transcripts' | 'ledger';
+  setActiveTab: (tab: 'facilities' | 'fleet' | 'pipeline' | 'transcripts' | 'ledger') => void;
   onReset: () => void;
   resetting: boolean;
   onOpenStandards?: () => void;
   onOpenLimitations?: () => void;
   onOpenGlossary?: () => void;
   results?: PipelineItemResult[];
+  darkMode?: boolean;
+  onToggleDarkMode?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -22,6 +24,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenLimitations,
   onOpenGlossary,
   results = [],
+  darkMode = false,
+  onToggleDarkMode,
 }) => {
   const approvedDeals = results.filter(
     (r) => r.negotiation.outcome === 'DEAL' && r.regulatory?.decision === 'APPROVED'
@@ -91,6 +95,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             <button
+              id="nav-fleet-tab"
+              onClick={() => setActiveTab('fleet')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold rounded-lg sm:rounded-full transition-all ${
+                activeTab === 'fleet'
+                  ? 'bg-[#ff5d02] text-white shadow-xs'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-white/80'
+              }`}
+            >
+              <Truck className="w-3.5 h-3.5" />
+              <span>Fleet</span>
+            </button>
+
+            <button
               id="nav-pipeline-tab"
               onClick={() => setActiveTab('pipeline')}
               className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold rounded-lg sm:rounded-full transition-all ${
@@ -139,6 +156,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <RotateCcw className={`w-3.5 h-3.5 ${resetting ? 'animate-spin text-orange-600' : ''}`} />
           </button>
+
+          {onToggleDarkMode && (
+            <button
+              id="dark-mode-toggle-btn"
+              onClick={onToggleDarkMode}
+              className="p-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-full border border-stone-200 transition"
+              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            </button>
+          )}
         </div>
       </div>
     </header>

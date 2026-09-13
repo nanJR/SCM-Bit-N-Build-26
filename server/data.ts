@@ -1,4 +1,4 @@
-import { Facility } from '../src/types';
+import { Carrier, Facility } from '../src/types';
 
 export const CLUSTERS: Record<string, [number, number]> = {
   Peenya: [13.028, 77.52],
@@ -150,6 +150,68 @@ export const MATERIAL_TAXONOMY: Record<string, { category: string; hazard: boole
     defaultGstRate: 5,
   },
 };
+
+export function getDefaultCarriers(): Record<string, Carrier> {
+  const carriers: Record<string, Carrier> = {
+    CAR01: {
+      id: 'CAR01',
+      name: 'Namma Fleet Movers (Peenya)',
+      cluster: 'Peenya',
+      lat: CLUSTERS.Peenya[0],
+      lon: CLUSTERS.Peenya[1],
+      vehicle_type: 'Mini Truck (Tata Ace)',
+      capacity_tons: 5,
+      rate_floor_inr_per_ton_km: 4.5,
+      hazmat_transport_license: false,
+    },
+    CAR02: {
+      id: 'CAR02',
+      name: 'Bengaluru Bulk Carriers (Dobaspet)',
+      cluster: 'Dobaspet',
+      lat: CLUSTERS.Dobaspet[0],
+      lon: CLUSTERS.Dobaspet[1],
+      vehicle_type: '10-Wheeler Truck',
+      capacity_tons: 40,
+      rate_floor_inr_per_ton_km: 3.2,
+      hazmat_transport_license: false,
+    },
+    CAR03: {
+      id: 'CAR03',
+      name: 'Swasthik Tippers & Logistics (Harohalli)',
+      cluster: 'Harohalli',
+      lat: CLUSTERS.Harohalli[0],
+      lon: CLUSTERS.Harohalli[1],
+      vehicle_type: 'Tipper Trailer',
+      capacity_tons: 80,
+      rate_floor_inr_per_ton_km: 2.6,
+      hazmat_transport_license: false,
+    },
+    CAR04: {
+      id: 'CAR04',
+      name: 'VaruTrans Hazmat Carriers (Bidadi)',
+      cluster: 'Bidadi',
+      lat: CLUSTERS.Bidadi[0],
+      lon: CLUSTERS.Bidadi[1],
+      vehicle_type: 'Bulk Tanker',
+      capacity_tons: 15,
+      rate_floor_inr_per_ton_km: 30.0, // Specialized hazmat tanker: premium rate, guaranteed NO_CARRIER on tight hazardous lanes
+      hazmat_transport_license: true,
+    },
+    CAR05: {
+      id: 'CAR05',
+      name: 'Kaveri Heavy Haulage (Whitefield)',
+      cluster: 'Whitefield',
+      lat: CLUSTERS.Whitefield[0],
+      lon: CLUSTERS.Whitefield[1],
+      vehicle_type: '10-Wheeler Truck',
+      capacity_tons: 300,
+      rate_floor_inr_per_ton_km: 1.8,
+      hazmat_transport_license: false,
+    },
+  };
+
+  return carriers;
+}
 
 export function getDefaultFacilities(): Record<string, Facility> {
   const facilities: Record<string, Facility> = {
@@ -693,6 +755,95 @@ export function getDefaultFacilities(): Record<string, Facility> {
         is_active: true,
         authorized_monthly_quota_tons: 30000.0, // 1000 TPD plant
         current_month_consumed_tons: 6400.0,
+      },
+    },
+    // F17-F19: Micro-lot MSME sellers (Tumkur Industrial Estate). Individually
+    // each is too small to be worth a dedicated route; the Aggregator/Pooling
+    // Agent merges same-material, same-cluster micro-lots below
+    // POOLING_VOLUME_THRESHOLD_TONS into one viable pooled consignment before
+    // matchmaking. Placed near F12 (Century Refineries, plastic_scrap buyer,
+    // Tumkur) which is otherwise >60km from the only large plastic_scrap
+    // seller (F07, Bidadi) -- so this corridor has no viable circular pathway
+    // today without pooling.
+    F17: {
+      id: 'F17',
+      name: 'Sri Ganesh Precision Components (Tumkur Industrial Estate)',
+      cluster: 'Tumkur',
+      lat: 13.348,
+      lon: 77.108,
+      role: 'seller',
+      material: 'plastic_scrap',
+      material_category: 'recyclable_plastic',
+      hazardous: false,
+      volume_tons_per_month: 1.8,
+      cost_floor_inr_per_ton: 1610,
+      cost_ceiling_inr_per_ton: null,
+      certified_hazard_handler: false,
+      kspcb_consent_id: 'KSPCB/XGN/TUM/2024/ORG-6601',
+      consent_type: 'Orange-CFO',
+      nearest_caaqms: 'CITY_RAILWAY',
+      gstin: '29AABCG7712M1Z2',
+      xgn_details: {
+        consent_id: 'KSPCB/XGN/TUM/2024/ORG-6601',
+        consent_type: 'Orange-CFO',
+        valid_till: '2028-02-28',
+        is_active: true,
+        authorized_monthly_quota_tons: 6.0,
+        current_month_consumed_tons: 1.2,
+      },
+    },
+    F18: {
+      id: 'F18',
+      name: 'Bharat Auto Ancillaries (Tumkur)',
+      cluster: 'Tumkur',
+      lat: 13.332,
+      lon: 77.093,
+      role: 'seller',
+      material: 'plastic_scrap',
+      material_category: 'recyclable_plastic',
+      hazardous: false,
+      volume_tons_per_month: 2.1,
+      cost_floor_inr_per_ton: 1550,
+      cost_ceiling_inr_per_ton: null,
+      certified_hazard_handler: false,
+      kspcb_consent_id: 'KSPCB/XGN/TUM/2024/ORG-6602',
+      consent_type: 'Orange-CFO',
+      nearest_caaqms: 'CITY_RAILWAY',
+      gstin: '29AABCB4471N1Z6',
+      xgn_details: {
+        consent_id: 'KSPCB/XGN/TUM/2024/ORG-6602',
+        consent_type: 'Orange-CFO',
+        valid_till: '2027-09-30',
+        is_active: true,
+        authorized_monthly_quota_tons: 6.0,
+        current_month_consumed_tons: 0.9,
+      },
+    },
+    F19: {
+      id: 'F19',
+      name: 'Nandi Plastics Micro Unit (Tumkur)',
+      cluster: 'Tumkur',
+      lat: 13.345,
+      lon: 77.115,
+      role: 'seller',
+      material: 'plastic_scrap',
+      material_category: 'recyclable_plastic',
+      hazardous: false,
+      volume_tons_per_month: 1.6,
+      cost_floor_inr_per_ton: 1500,
+      cost_ceiling_inr_per_ton: null,
+      certified_hazard_handler: false,
+      kspcb_consent_id: 'KSPCB/XGN/TUM/2024/ORG-6603',
+      consent_type: 'Orange-CFO',
+      nearest_caaqms: 'CITY_RAILWAY',
+      gstin: '29AABCN8890P1Z9',
+      xgn_details: {
+        consent_id: 'KSPCB/XGN/TUM/2024/ORG-6603',
+        consent_type: 'Orange-CFO',
+        valid_till: '2028-07-31',
+        is_active: true,
+        authorized_monthly_quota_tons: 5.0,
+        current_month_consumed_tons: 0.6,
       },
     },
   };

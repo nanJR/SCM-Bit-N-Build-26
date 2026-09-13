@@ -24,6 +24,8 @@ import {
   FileCheck2,
   Compass,
   Clock,
+  Gauge,
+  BarChart3,
 } from 'lucide-react';
 
 interface PipelineTabProps {
@@ -53,6 +55,9 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
   ).length;
   const vetoCount = results.filter((r) => r.regulatory?.decision === 'VETOED').length;
   const noDealCount = results.filter((r) => r.negotiation.outcome === 'NO_DEAL').length;
+  const noCarrierCount = results.filter(
+    (r) => r.negotiation.outcome === 'DEAL' && r.logistics_deal?.outcome === 'NO_CARRIER'
+  ).length;
   
   const totalCo2Saved = results.reduce((acc, r) => {
     if (r.negotiation.outcome === 'DEAL' && r.regulatory?.decision === 'APPROVED') {
@@ -67,6 +72,33 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
     }
     return acc;
   }, 0);
+
+  // Negotiation Fairness & Efficiency Audit: for every negotiated price deal,
+  // score how balanced the settlement was between the seller's private floor
+  // and buyer's private ceiling (50 = perfectly split the difference, 0/100 =
+  // one side got nothing), plus how many rounds it took to converge.
+  const priceDeals = results.filter(
+    (r) => r.negotiation.outcome === 'DEAL' && r.negotiation.final_price_inr_per_ton !== null
+  );
+  const fairnessAudit = priceDeals.map((r) => {
+    const floor = r.seller.cost_floor_inr_per_ton ?? 0;
+    const ceiling = r.buyer.cost_ceiling_inr_per_ton ?? 0;
+    const price = r.negotiation.final_price_inr_per_ton as number;
+    const positionPct = ceiling !== floor ? ((price - floor) / (ceiling - floor)) * 100 : 50;
+    const balanceScore = Math.max(0, 100 - Math.abs(positionPct - 50) * 2);
+    const totalRounds = r.negotiation.rounds.length + (r.logistics_deal?.rounds.length || 0);
+    return {
+      label: `${r.seller.name.slice(0, 18)} ↔ ${r.buyer.name.slice(0, 18)}`,
+      balanceScore,
+      totalRounds,
+    };
+  });
+  const avgBalanceScore = fairnessAudit.length
+    ? fairnessAudit.reduce((acc, f) => acc + f.balanceScore, 0) / fairnessAudit.length
+    : 0;
+  const avgRounds = fairnessAudit.length
+    ? fairnessAudit.reduce((acc, f) => acc + f.totalRounds, 0) / fairnessAudit.length
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -126,7 +158,7 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
       {/* KPI Stats Row & Pairings/Outcomes - Visible ONLY after running deals */}
       {results.length > 0 && (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
             <div className="bg-white border border-orange-200/80 rounded-2xl p-4 shadow-xs">
               <div className="text-[11px] font-semibold text-stone-500 uppercase tracking-wide font-mono">Pairs Evaluated</div>
               <div className="text-2xl font-black text-stone-900 mt-1">{results.length}</div>
@@ -140,15 +172,21 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
             </div>
 
             <div className="bg-white border border-amber-200 rounded-2xl p-4 shadow-xs">
-              <div className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide font-mono">KSPCB Vetoes</div>
+              <div className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide font-mono">Vetoed / Blocked</div>
               <div className="text-2xl font-black text-amber-600 mt-1">{vetoCount}</div>
-              <div className="text-[10px] text-stone-400">Uncertified handler</div>
+              <div className="text-[10px] text-stone-400">KSPCB rule or capacity audit</div>
             </div>
 
             <div className="bg-white border border-rose-200 rounded-2xl p-4 shadow-xs">
               <div className="text-[11px] font-semibold text-rose-700 uppercase tracking-wide font-mono">Price Gap (No Deal)</div>
               <div className="text-2xl font-black text-rose-600 mt-1">{noDealCount}</div>
               <div className="text-[10px] text-stone-400">Floor &gt; Ceiling</div>
+            </div>
+
+            <div className="bg-white border border-orange-300 rounded-2xl p-4 shadow-xs">
+              <div className="text-[11px] font-semibold text-orange-700 uppercase tracking-wide font-mono">No Carrier</div>
+              <div className="text-2xl font-black text-orange-600 mt-1">{noCarrierCount}</div>
+              <div className="text-[10px] text-stone-400">Freight budget/capacity gap</div>
             </div>
 
             <div className="bg-white border border-orange-200 rounded-2xl p-4 shadow-xs">
@@ -167,6 +205,56 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
           {/* Real-time Carbon & Resource Offset Counter */}
           <CarbonOffsetCounter results={results} />
 
+          {/* Negotiation Fairness & Efficiency Audit */}
+          {fairnessAudit.length > 0 && (
+            <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-5 sm:p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <div className="text-[11px] font-extrabold tracking-wider text-[#ea580c] uppercase mb-1 font-mono flex items-center gap-1.5">
+                    <Gauge className="w-3.5 h-3.5" />
+                    NEGOTIATION FAIRNESS & EFFICIENCY AUDIT
+                  </div>
+                  <p className="text-xs text-stone-600 max-w-2xl">
+                    Scores each settled price against the seller's floor and buyer's ceiling (100 = split exactly
+                    down the middle) and how many rounds the protocol took to converge — an independent benchmark
+                    of the Monotonic Concession Protocol's own fairness.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-center px-4 py-2 rounded-xl bg-orange-50 border border-orange-200">
+                    <div className="text-[10px] font-semibold text-stone-500 uppercase font-mono">Avg. Balance</div>
+                    <div className="text-xl font-black text-[#ea580c]">{avgBalanceScore.toFixed(0)}/100</div>
+                  </div>
+                  <div className="text-center px-4 py-2 rounded-xl bg-stone-50 border border-stone-200">
+                    <div className="text-[10px] font-semibold text-stone-500 uppercase font-mono">Avg. Rounds</div>
+                    <div className="text-xl font-black text-stone-800">{avgRounds.toFixed(1)}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                {fairnessAudit.map((f, i) => (
+                  <div key={i} className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-xs">
+                    <div className="font-semibold text-stone-800 truncate">{f.label}</div>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <div className="flex items-center gap-1.5 text-stone-500">
+                        <BarChart3 className="w-3 h-3" />
+                        <span>{f.totalRounds} rounds</span>
+                      </div>
+                      <span
+                        className={`font-mono font-bold ${
+                          f.balanceScore >= 70 ? 'text-emerald-700' : f.balanceScore >= 40 ? 'text-amber-700' : 'text-rose-700'
+                        }`}
+                      >
+                        {f.balanceScore.toFixed(0)}/100
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Candidate Pair Results List */}
           <section className="space-y-4">
             <div className="text-center py-2">
@@ -184,9 +272,13 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                   const outcome = r.negotiation.outcome;
                   const regDecision = r.regulatory?.decision;
 
-                  let statusType: 'deal' | 'vetoed' | 'nodeal' = 'nodeal';
+                  let statusType: 'deal' | 'vetoed' | 'nodeal' | 'no_carrier' = 'nodeal';
                   if (outcome === 'DEAL') {
-                    statusType = regDecision === 'VETOED' ? 'vetoed' : 'deal';
+                    if (r.logistics_deal?.outcome === 'NO_CARRIER') {
+                      statusType = 'no_carrier';
+                    } else {
+                      statusType = regDecision === 'VETOED' ? 'vetoed' : 'deal';
+                    }
                   }
 
                   const isExpanded = expandedIndex === idx;
@@ -203,6 +295,8 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                           ? 'border-emerald-300 ring-1 ring-emerald-100'
                           : statusType === 'vetoed'
                           ? 'border-amber-300 ring-1 ring-amber-100'
+                          : statusType === 'no_carrier'
+                          ? 'border-orange-300 ring-1 ring-orange-100'
                           : 'border-stone-200'
                       }`}
                     >
@@ -226,6 +320,11 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                       {statusType === 'nodeal' && (
                         <div className="w-10 h-10 rounded-xl bg-stone-100 text-stone-500 flex items-center justify-center">
                           <XCircle className="w-5 h-5" />
+                        </div>
+                      )}
+                      {statusType === 'no_carrier' && (
+                        <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center">
+                          <Truck className="w-5 h-5" />
                         </div>
                       )}
                     </div>
@@ -272,10 +371,20 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                           ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                           : statusType === 'vetoed'
                           ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                          : statusType === 'no_carrier'
+                          ? 'bg-orange-100 text-orange-800 border border-orange-300'
                           : 'bg-stone-100 text-stone-600 border border-stone-200'
                       }`}
                     >
-                      {statusType === 'deal' ? 'APPROVED DEAL' : statusType === 'vetoed' ? 'VETOED (KSPCB)' : 'NO DEAL'}
+                      {statusType === 'deal'
+                        ? 'APPROVED DEAL'
+                        : statusType === 'vetoed'
+                        ? r.regulatory?.rule_applied?.includes('Auditor Agent')
+                          ? 'BLOCKED (ALLOCATION)'
+                          : 'VETOED (KSPCB)'
+                        : statusType === 'no_carrier'
+                        ? 'NO CARRIER AVAILABLE'
+                        : 'NO DEAL'}
                     </span>
                     {isExpanded ? <ChevronUp className="w-4 h-4 text-stone-400" /> : <ChevronDown className="w-4 h-4 text-stone-400" />}
                   </div>
@@ -447,7 +556,12 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                         <div className="font-bold flex items-center justify-between gap-1.5 mb-1 text-sm">
                           <div className="flex items-center gap-1.5">
                             <ShieldCheck className="w-4 h-4 text-emerald-700" />
-                            <span>KSPCB Regulatory Supervisor: {r.regulatory.decision}</span>
+                            <span>
+                              {r.regulatory.rule_applied?.includes('Auditor Agent')
+                                ? 'Allocation Auditor Agent'
+                                : 'KSPCB Regulatory Supervisor'}
+                              : {r.regulatory.decision}
+                            </span>
                           </div>
                           {r.regulatory.xgn_consent_status && (
                             <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-white border border-emerald-300 text-emerald-800">
@@ -490,6 +604,84 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                       <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-900">
                         <span className="font-bold">Bargaining Breakdown: </span>
                         {r.negotiation.reason}
+                      </div>
+                    )}
+
+                    {/* Logistics/Carrier Negotiation Outcome */}
+                    {r.logistics_deal && (
+                      <div
+                        className={`p-3.5 rounded-xl border text-xs leading-relaxed ${
+                          r.logistics_deal.outcome === 'DEAL'
+                            ? 'bg-white border-stone-200'
+                            : 'bg-orange-50 border-orange-200 text-orange-900'
+                        }`}
+                      >
+                        <div className="font-bold flex items-center gap-1.5 mb-1 text-stone-800">
+                          <Truck className="w-4 h-4 text-orange-600" />
+                          <span>Logistics/Carrier Negotiation Agent</span>
+                        </div>
+                        {r.logistics_deal.outcome === 'DEAL' ? (
+                          <div className="text-stone-700 font-mono">
+                            {r.logistics_deal.carrier_name} ({r.logistics_deal.vehicle_type}) — ₹{r.logistics_deal.final_rate_inr_per_ton_km}/ton-km,
+                            total freight ₹{r.logistics_deal.total_freight_cost_inr}
+                          </div>
+                        ) : (
+                          <span>{r.logistics_deal.reason}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Aggregator / Micro-Lot Pooling Agent breakdown */}
+                    {r.pooled_members && r.pooled_members.length > 0 && (
+                      <div className="p-3.5 rounded-xl bg-white border border-stone-200 text-xs space-y-2.5 shadow-2xs">
+                        <div className="font-bold text-stone-800 flex items-center gap-1.5">
+                          <Building2 className="w-4 h-4 text-purple-600" />
+                          <span>Aggregator Agent: Pooled Micro-Lot Consignment ({r.pooled_members.length} MSMEs)</span>
+                        </div>
+                        <div className="rounded-lg border border-stone-200 overflow-hidden">
+                          <table className="w-full text-left text-[11px]">
+                            <thead className="bg-stone-100 text-stone-600 font-semibold">
+                              <tr>
+                                <th className="p-2">MSME</th>
+                                <th className="p-2 text-right">Volume</th>
+                                <th className="p-2 text-right">Share</th>
+                                <th className="p-2 text-right">Freight Share</th>
+                                <th className="p-2 text-right">Net Payout</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-stone-100 font-mono">
+                              {r.pooled_members.map((m) => (
+                                <tr key={m.facility_id}>
+                                  <td className="p-2 font-sans text-stone-800">{m.facility_name}</td>
+                                  <td className="p-2 text-right">{m.volume_tons}t</td>
+                                  <td className="p-2 text-right">{m.share_pct}%</td>
+                                  <td className="p-2 text-right">₹{m.freight_share_inr}</td>
+                                  <td className="p-2 text-right font-bold text-emerald-700">₹{m.net_payout_inr}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <p className="text-[10px] text-stone-500">
+                          Individually too small for a dedicated freight route — pooled together, shared fixed
+                          dispatch overhead splits proportionally by volume instead of eating each MSME's margin alone.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Settlement & Escrow Agent */}
+                    {r.passport?.deal.settlement && (
+                      <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200 text-xs space-y-1.5">
+                        <div className="font-bold text-emerald-900 flex items-center gap-1.5">
+                          <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                          <span>Settlement & Escrow Agent: {r.passport.deal.settlement.escrow_voucher_id}</span>
+                        </div>
+                        <div className="text-emerald-900 font-mono">
+                          T+0 Advance ({r.passport.deal.settlement.advance_pct}%): ₹{r.passport.deal.settlement.advance_inr} via {r.passport.deal.settlement.advance_upi_ref} • Balance ₹{r.passport.deal.settlement.balance_inr} on delivery confirmation
+                        </div>
+                        <div className="text-[10px] text-emerald-700">
+                          Middleman deduction capped at {r.passport.deal.settlement.katoti_cap_pct}% (vs. traditional uncapped deductions).
+                        </div>
                       </div>
                     )}
 
@@ -542,6 +734,7 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
           contract={selectedContractItem.passport?.deal.contract}
           ewayBill={selectedContractItem.passport?.deal.eway_bill}
           hazardManifest={selectedContractItem.passport?.deal.hazard_manifest}
+          settlement={selectedContractItem.passport?.deal.settlement}
         />
       )}
     </div>

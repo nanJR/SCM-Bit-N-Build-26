@@ -69,6 +69,12 @@ export async function askGemini(
     if (systemPrompt.includes('Buyer')) {
       return `Offer reflects maximum viable input substitution cost relative to virgin raw material parity.`;
     }
+    if (systemPrompt.includes('Carrier')) {
+      return `Freight quote reflects fuel surcharge, distance, and vehicle capacity utilization for this consignment.`;
+    }
+    if (systemPrompt.includes('Shipper') || systemPrompt.includes('Logistics Coordinator')) {
+      return `Freight bid balances landed cost against remaining margin after material procurement price.`;
+    }
     if (systemPrompt.includes('vetoed')) {
       return `VETOED: Non-certified buyers are strictly prohibited from receiving or processing hazardous byproducts under KSPCB rules.`;
     }
@@ -122,6 +128,12 @@ export async function askGemini(
     }
     if (systemPrompt.includes('Buyer')) {
       return `Offer reflects maximum viable input substitution cost relative to virgin raw material parity.`;
+    }
+    if (systemPrompt.includes('Carrier')) {
+      return `Freight quote reflects fuel surcharge, distance, and vehicle capacity utilization for this consignment.`;
+    }
+    if (systemPrompt.includes('Shipper') || systemPrompt.includes('Logistics Coordinator')) {
+      return `Freight bid balances landed cost against remaining margin after material procurement price.`;
     }
     if (systemPrompt.includes('vetoed')) {
       return `VETOED: Non-certified buyers are strictly prohibited from receiving or processing hazardous byproducts under KSPCB rules.`;

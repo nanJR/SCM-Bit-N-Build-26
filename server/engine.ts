@@ -3,10 +3,13 @@ import fs from 'fs';
 import path from 'path';
 import {
   CandidateMatch,
+  Carrier,
   CircularPurchaseOrder,
   DigitalWastePassport,
   EWayBill,
   Facility,
+  FreightNegotiationResult,
+  FreightNegotiationRound,
   HazardousManifestForm10,
   LedgerVerification,
   LogisticsCorridor,
@@ -15,11 +18,13 @@ import {
   NegotiationRound,
   PassportDealData,
   PipelineItemResult,
+  PooledMember,
   QualityToleranceCheck,
   RegulatoryDecision,
   RouteFeasibility,
+  SettlementRecord,
 } from '../src/types';
-import { getDefaultFacilities, MATERIAL_TAXONOMY } from './data';
+import { getDefaultCarriers, getDefaultFacilities, MATERIAL_TAXONOMY } from './data';
 import { askGemini } from './gemini';
 import {
   syncFacilitiesWithFirestore,
@@ -31,6 +36,27 @@ import {
 const MAX_FEASIBLE_RADIUS_KM = 60;
 const TRUCK_COST_PER_KM_PER_TON = 8.0;
 const CO2_EMISSION_KG_PER_TON_KM = 0.1;
+
+// Aggregator / Micro-Lot Pooling Agent: same-material sellers in the same
+// cluster with individual volume below this threshold get merged into one
+// pooled virtual seller before matchmaking, so fragmented MSME micro-lots
+// (a few tons each) can clear the same freight/regulatory pipeline as a
+// single viable consignment instead of being ignored one-by-one.
+const POOLING_VOLUME_THRESHOLD_TONS = 3.0;
+
+// Fixed per-shipment overhead (loading, paperwork, minimum-trip charge) that
+// a single small shipment must absorb in full, but that a pooled consignment
+// splits proportionally across its members -- this is what actually makes
+// pooling pay off, not just convenience.
+const FIXED_DISPATCH_FEE_INR = 800;
+
+// A carrier already running a route this pipeline run gets a discount on
+// its next quote in the same run, modeling a cheaper backhaul/return leg
+// instead of an empty return trip.
+const BACKHAUL_DISCOUNT_FACTOR = 0.85;
+
+const SETTLEMENT_ADVANCE_PCT = 60;
+const KATOTI_DEDUCTION_CAP_PCT = 2;
 
 const CO2_VIRGIN_MATERIAL_KG_PER_TON: Record<string, number> = {
   steel_slag: 1800,
@@ -302,6 +328,85 @@ export function validateRoute(
   };
 }
 
+export interface PoolMembership {
+  facility_id: string;
+  volume_tons: number;
+  cost_floor_inr_per_ton: number;
+}
+
+// Merges same-material, same-cluster sellers whose individual volume falls
+// below POOLING_VOLUME_THRESHOLD_TONS into a single synthetic pooled seller,
+// so matchmaking/negotiation treats fragmented micro-lots as one viable
+// consignment. Returns the transformed facility map (originals removed,
+// non-qualifying facilities untouched) plus a membership index keyed by the
+// pooled seller's id, used later to split payouts proportionally.
+export function poolMicroLotSellers(
+  facilities: Record<string, Facility>
+): { pooledFacilities: Record<string, Facility>; poolMembership: Record<string, PoolMembership[]> } {
+  const groups: Record<string, Facility[]> = {};
+
+  for (const f of Object.values(facilities)) {
+    if (f.role !== 'seller' || f.volume_tons_per_month >= POOLING_VOLUME_THRESHOLD_TONS) continue;
+    const key = `${f.material}::${f.cluster}`;
+    (groups[key] = groups[key] || []).push(f);
+  }
+
+  const pooledFacilities: Record<string, Facility> = { ...facilities };
+  const poolMembership: Record<string, PoolMembership[]> = {};
+
+  for (const [key, members] of Object.entries(groups)) {
+    if (members.length < 2) continue; // nothing to pool
+
+    const [material, cluster] = key.split('::');
+    const totalVolume = Math.round(members.reduce((acc, m) => acc + m.volume_tons_per_month, 0) * 100) / 100;
+    const weightedFloor =
+      members.reduce((acc, m) => acc + (m.cost_floor_inr_per_ton || 0) * m.volume_tons_per_month, 0) / totalVolume;
+    const avgLat = members.reduce((acc, m) => acc + m.lat, 0) / members.length;
+    const avgLon = members.reduce((acc, m) => acc + m.lon, 0) / members.length;
+    const template = members[0];
+    const poolId = `POOL-${material}-${cluster}`.toUpperCase();
+
+    for (const m of members) delete pooledFacilities[m.id];
+
+    const aggregatedQuota = members.reduce(
+      (acc, m) => ({
+        authorized: acc.authorized + (m.xgn_details?.authorized_monthly_quota_tons || 0),
+        consumed: acc.consumed + (m.xgn_details?.current_month_consumed_tons || 0),
+      }),
+      { authorized: 0, consumed: 0 }
+    );
+
+    pooledFacilities[poolId] = {
+      ...template,
+      id: poolId,
+      name: `Pooled Micro-Lot Consignment: ${members.length} MSMEs (${cluster})`,
+      cluster,
+      lat: avgLat,
+      lon: avgLon,
+      material,
+      volume_tons_per_month: totalVolume,
+      cost_floor_inr_per_ton: Math.round(weightedFloor),
+      lab_assay: undefined,
+      sensor_adjustment: undefined,
+      xgn_details: template.xgn_details
+        ? {
+            ...template.xgn_details,
+            authorized_monthly_quota_tons: Math.round(aggregatedQuota.authorized * 100) / 100,
+            current_month_consumed_tons: Math.round(aggregatedQuota.consumed * 100) / 100,
+          }
+        : undefined,
+    };
+
+    poolMembership[poolId] = members.map((m) => ({
+      facility_id: m.id,
+      volume_tons: m.volume_tons_per_month,
+      cost_floor_inr_per_ton: m.cost_floor_inr_per_ton || 0,
+    }));
+  }
+
+  return { pooledFacilities, poolMembership };
+}
+
 export function findCandidateMatches(facilities: Record<string, Facility>): CandidateMatch[] {
   const sellers = Object.values(facilities).filter((f) => f.role === 'seller');
   const buyers = Object.values(facilities).filter((f) => f.role === 'buyer');
@@ -354,6 +459,59 @@ export async function rankCandidates(
   return results;
 }
 
+export interface ConcessionRound {
+  round: number;
+  ask: number;
+  bid: number;
+}
+
+export interface ConcessionOutcome {
+  outcome: 'DEAL' | 'NO_DEAL';
+  final_value: number | null;
+  rounds: ConcessionRound[];
+}
+
+// Generic monotonic-concession negotiation mechanics, shared by material-price
+// and freight-rate negotiations. Deliberately side-effect-free (no Gemini calls)
+// so callers can attach their own domain-specific notes per round.
+export function runConcessionNegotiation(
+  floor: number,
+  ceiling: number,
+  openingAskMultiplier: number,
+  openingBidMultiplier: number,
+  maxRounds: number = 5
+): ConcessionOutcome {
+  let askPrice = floor * openingAskMultiplier;
+  let bidPrice = ceiling * openingBidMultiplier;
+
+  const initialGap = askPrice - bidPrice;
+  const step = Math.max(initialGap, 0) / Math.max(maxRounds - 1, 1);
+
+  const rounds: ConcessionRound[] = [];
+  let outcome: 'DEAL' | 'NO_DEAL' = 'NO_DEAL';
+  let finalValue: number | null = null;
+
+  for (let r = 1; r <= maxRounds; r++) {
+    const roundAsk = Math.round(askPrice);
+    const roundBid = Math.round(bidPrice);
+
+    if (bidPrice >= askPrice) {
+      finalValue = Math.round((askPrice + bidPrice) / 2);
+      outcome = 'DEAL';
+      rounds.push({ round: r, ask: roundAsk, bid: roundBid });
+      break;
+    }
+
+    rounds.push({ round: r, ask: roundAsk, bid: roundBid });
+
+    // Monotonic concession
+    askPrice = Math.max(floor, askPrice - step / 2);
+    bidPrice = Math.min(ceiling, bidPrice + step / 2);
+  }
+
+  return { outcome, final_value: finalValue, rounds };
+}
+
 export async function negotiate(
   seller: Facility,
   buyer: Facility,
@@ -388,26 +546,19 @@ export async function negotiate(
     ceiling = Math.round(ceiling * (1 - qualityAdjustment / 100));
   }
 
-  let askPrice = floor * 1.4;
-  let bidPrice = ceiling * 0.6;
   const MAX_ROUNDS = 5;
-
-  const initialGap = askPrice - bidPrice;
-  const step = Math.max(initialGap, 0) / Math.max(MAX_ROUNDS - 1, 1);
+  const concession = runConcessionNegotiation(floor, ceiling, 1.4, 0.6, MAX_ROUNDS);
 
   const rounds: NegotiationRound[] = [];
-  let outcome: 'DEAL' | 'NO_DEAL' = 'NO_DEAL';
-  let finalPrice: number | null = null;
-
-  for (let r = 1; r <= MAX_ROUNDS; r++) {
-    const sAsk = Math.round(askPrice);
-    const bBid = Math.round(bidPrice);
+  for (const cRound of concession.rounds) {
+    const { round: r, ask: sAsk, bid: bBid } = cRound;
+    const isSettleRound = concession.outcome === 'DEAL' && r === concession.rounds[concession.rounds.length - 1].round;
 
     let sellerNote = `Round ${r}: seller conceding to INR ${sAsk}/ton towards buyer bid while protecting operating margins.`;
     let buyerNote = `Round ${r}: buyer advancing bid to INR ${bBid}/ton to bridge spread against virgin material ceiling.`;
 
     // Generate LLM notes for the opening round and when reaching a deal or final round
-    if (r === 1 || bidPrice >= askPrice || r === MAX_ROUNDS) {
+    if (r === 1 || isSettleRound || r === MAX_ROUNDS) {
       const sellerNotePromise = askGemini(
         `You are the Seller agent in a B2B waste-material negotiation. In ONE short sentence, justify your price offer. Be concise and factual.`,
         `Round ${r}: offering INR ${sAsk}/ton for ${material}. Floor is INR ${floor}/ton.${qualityAdjustment > 0 ? ` Note: ${qualityAdjustment}% quality deduction applied.` : ''}`,
@@ -432,17 +583,10 @@ export async function negotiate(
       seller_note: sellerNote,
       buyer_note: buyerNote,
     });
-
-    if (bidPrice >= askPrice) {
-      finalPrice = Math.round((askPrice + bidPrice) / 2);
-      outcome = 'DEAL';
-      break;
-    }
-
-    // Monotonic concession
-    askPrice = Math.max(floor, askPrice - step / 2);
-    bidPrice = Math.min(ceiling, bidPrice + step / 2);
   }
+
+  const outcome = concession.outcome;
+  const finalPrice = concession.final_value;
 
   let reason: string | null = null;
   if (outcome === 'NO_DEAL') {
@@ -463,10 +607,132 @@ export async function negotiate(
   };
 }
 
+export function selectBestCarrier(
+  carriers: Record<string, Carrier>,
+  volumeTons: number,
+  isHazardous: boolean
+): Carrier | null {
+  const eligible = Object.values(carriers).filter(
+    (c) => c.capacity_tons >= volumeTons && (!isHazardous || c.hazmat_transport_license)
+  );
+  if (eligible.length === 0) return null;
+  // Smallest capacity that still fits is treated as the most cost-efficient match.
+  return [...eligible].sort((a, b) => a.capacity_tons - b.capacity_tons)[0];
+}
+
+export async function negotiateFreight(
+  carrier: Carrier | null,
+  route: RouteFeasibility,
+  buyerCeilingInrPerTon: number,
+  agreedMaterialPriceInrPerTon: number,
+  volumeTons: number,
+  material: string,
+  isBackhaul: boolean = false
+): Promise<FreightNegotiationResult> {
+  if (!carrier) {
+    return {
+      carrier_id: null,
+      carrier_name: null,
+      vehicle_type: null,
+      outcome: 'NO_CARRIER',
+      final_rate_inr_per_ton_km: null,
+      total_freight_cost_inr: null,
+      reason: 'No eligible carrier: no registered fleet operator has sufficient capacity (or hazmat transport license) for this consignment.',
+      rounds: [],
+    };
+  }
+
+  const distanceKm = route.distance_km;
+  const headroomInrPerTon = buyerCeilingInrPerTon - agreedMaterialPriceInrPerTon;
+  const headroomInrPerTonKm = distanceKm > 0 ? headroomInrPerTon / distanceKm : 0;
+
+  const floor = isBackhaul
+    ? Math.round(carrier.rate_floor_inr_per_ton_km * BACKHAUL_DISCOUNT_FACTOR * 100) / 100
+    : carrier.rate_floor_inr_per_ton_km;
+  const ceiling = headroomInrPerTonKm;
+
+  if (ceiling <= floor) {
+    return {
+      carrier_id: carrier.id,
+      carrier_name: carrier.name,
+      vehicle_type: carrier.vehicle_type,
+      outcome: 'NO_CARRIER',
+      final_rate_inr_per_ton_km: null,
+      total_freight_cost_inr: null,
+      reason: `Buyer's remaining budget headroom (INR ${headroomInrPerTon.toFixed(2)}/ton over ${distanceKm}km, approx. INR ${headroomInrPerTonKm.toFixed(2)}/ton-km) cannot meet ${carrier.name}'s minimum freight rate (INR ${floor}/ton-km).`,
+      rounds: [],
+    };
+  }
+
+  const MAX_ROUNDS = 5;
+  const concession = runConcessionNegotiation(floor, ceiling, 1.4, 0.6, MAX_ROUNDS);
+
+  const rounds: FreightNegotiationRound[] = [];
+  for (const cRound of concession.rounds) {
+    const { round: r, ask: cAsk, bid: sBid } = cRound;
+    const isSettleRound = concession.outcome === 'DEAL' && r === concession.rounds[concession.rounds.length - 1].round;
+
+    let carrierNote = `Round ${r}: carrier holding at INR ${cAsk}/ton-km to cover fuel and vehicle utilization costs.`;
+    let shipperNote = `Round ${r}: shipper bidding INR ${sBid}/ton-km, bounded by remaining material-price margin.`;
+
+    if (r === 1 || isSettleRound || r === MAX_ROUNDS) {
+      const carrierNotePromise = askGemini(
+        `You are the Carrier agent in a B2B freight-rate negotiation. In ONE short sentence, justify your freight rate offer. Be concise and factual.`,
+        `Round ${r}: quoting INR ${cAsk}/ton-km to move ${material} over ${distanceKm}km. Floor is INR ${floor}/ton-km.`,
+        60
+      );
+      const shipperNotePromise = askGemini(
+        `You are the Shipper / Logistics Coordinator agent in a B2B freight-rate negotiation. In ONE short sentence, justify your freight bid. Be concise and factual.`,
+        `Round ${r}: bidding INR ${sBid}/ton-km for ${material} over ${distanceKm}km. Ceiling is INR ${ceiling.toFixed(2)}/ton-km.`,
+        60
+      );
+      const [cNote, sNote] = await Promise.all([carrierNotePromise, shipperNotePromise]);
+      carrierNote = cNote;
+      shipperNote = sNote;
+    }
+
+    rounds.push({
+      round: r,
+      carrier_ask_inr_per_ton_km: cAsk,
+      shipper_bid_inr_per_ton_km: sBid,
+      carrier_note: carrierNote,
+      shipper_note: shipperNote,
+    });
+  }
+
+  if (concession.outcome === 'NO_DEAL') {
+    return {
+      carrier_id: carrier.id,
+      carrier_name: carrier.name,
+      vehicle_type: carrier.vehicle_type,
+      outcome: 'NO_CARRIER',
+      final_rate_inr_per_ton_km: null,
+      total_freight_cost_inr: null,
+      reason: `No freight rate overlap within ${MAX_ROUNDS} rounds (carrier floor INR ${floor}/ton-km vs shipper ceiling INR ${ceiling.toFixed(2)}/ton-km).`,
+      rounds,
+    };
+  }
+
+  const finalRate = concession.final_value!;
+  const totalFreightCost = Math.round(finalRate * distanceKm * volumeTons + FIXED_DISPATCH_FEE_INR);
+
+  return {
+    carrier_id: carrier.id,
+    carrier_name: carrier.name,
+    vehicle_type: carrier.vehicle_type,
+    outcome: 'DEAL',
+    final_rate_inr_per_ton_km: finalRate,
+    total_freight_cost_inr: totalFreightCost,
+    reason: null,
+    rounds,
+  };
+}
+
 export async function reviewDeal(
   seller: Facility,
   buyer: Facility,
-  negotiationResult: NegotiationResult
+  negotiationResult: NegotiationResult,
+  carrier?: Carrier | null
 ): Promise<RegulatoryDecision> {
   const material = negotiationResult.material;
   const isHazardous = seller.hazardous;
@@ -484,6 +750,22 @@ export async function reviewDeal(
     const explanation = await askGemini(
       'You are the KSPCB Regulatory Agent. In one short sentence, explain why this trade is being vetoed on compliance grounds.',
       `Material: ${material}. Rule: ${rule}. Buyer ${buyer.name} is not certified.`,
+      80
+    );
+    return {
+      decision: 'VETOED',
+      rule_applied: rule,
+      explanation,
+    };
+  }
+
+  // 1b. Hazardous Waste Transport Authorization Check (defense-in-depth; carrier
+  // selection already filters for this, so this should be nearly unreachable)
+  if (isHazardous && carrier && !carrier.hazmat_transport_license) {
+    const rule = 'KSPCB Hazardous and Other Wastes (Management & Transboundary Movement) Rules 2016: Transporter must hold hazmat transport authorization.';
+    const explanation = await askGemini(
+      'You are the KSPCB Regulatory Agent. In one short sentence, explain why this trade is being vetoed on compliance grounds.',
+      `Material: ${material}. Rule: ${rule}. Carrier ${carrier.name} lacks hazmat transport license.`,
       80
     );
     return {
@@ -649,6 +931,24 @@ export function generateCircularContractAndEWayBill(
     demurrage_clause: 'Free detention time: 3 hours. Demurrage rate INR 500/hour for multi-axle carrier thereafter.',
   };
 
+  if (deal.logistics_deal) {
+    const freightSubtotal = deal.logistics_deal.total_freight_cost_inr;
+    const freightGstRate = 5; // GTA reverse-charge convention (CGST Notification 11/2017) — simplified, flat rate
+    const freightGst = Math.round((freightSubtotal * freightGstRate) / 100);
+    const freightCgst = Math.round(freightGst / 2);
+    contract.freight_line_item = {
+      carrier_name: deal.logistics_deal.carrier_name,
+      vehicle_type: deal.logistics_deal.vehicle_type,
+      rate_inr_per_ton_km: deal.logistics_deal.agreed_rate_inr_per_ton_km,
+      distance_km: deal.logistics.distance_km,
+      freight_subtotal_inr: freightSubtotal,
+      freight_gst_rate_pct: freightGstRate,
+      freight_cgst_inr: freightCgst,
+      freight_sgst_inr: freightGst - freightCgst,
+      freight_total_inr: freightSubtotal + freightGst,
+    };
+  }
+
   // E-Way Bill
   const ewbNumber = `5310-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
   const validUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').slice(0, 19) + ' IST';
@@ -663,9 +963,9 @@ export function generateCircularContractAndEWayBill(
     eway_bill_number: ewbNumber,
     generated_date: dateStr,
     valid_until: validUntil,
-    transporter_name: 'Karnataka Industrial Circular Logistics Consortium',
+    transporter_name: deal.logistics_deal?.carrier_name || 'Karnataka Industrial Circular Logistics Consortium',
     transporter_id: '29AAACK9901Z1ZT',
-    vehicle_number: vehicleReg,
+    vehicle_number: deal.logistics_deal ? `${vehicleReg} (${deal.logistics_deal.vehicle_type})` : vehicleReg,
     origin_cluster: seller.cluster,
     destination_cluster: buyer.cluster,
     distance_km: deal.logistics.distance_km,
@@ -695,6 +995,25 @@ export function generateCircularContractAndEWayBill(
   return { contract, eway_bill, hazard_manifest };
 }
 
+// Settlement / Escrow Agent: mints a simulated smart-escrow voucher for an
+// approved deal and disburses a T+0 advance to the seller immediately,
+// releasing the balance only on delivery/weighbridge confirmation. Also caps
+// the simulated middleman deduction ("katoti") well below traditional rates.
+export function buildSettlementRecord(totalPayableInr: number): SettlementRecord {
+  const advanceInr = Math.round((totalPayableInr * SETTLEMENT_ADVANCE_PCT) / 100);
+  const balanceInr = totalPayableInr - advanceInr;
+  return {
+    escrow_voucher_id: `ESC-2026-${Math.floor(100000 + Math.random() * 900000)}`,
+    total_payable_inr: totalPayableInr,
+    advance_pct: SETTLEMENT_ADVANCE_PCT,
+    advance_inr: advanceInr,
+    advance_upi_ref: `UPI-AUTOPAY-${Math.floor(1000000000 + Math.random() * 9000000000)}`,
+    balance_inr: balanceInr,
+    balance_release_condition: 'Released on weighbridge gross-slip confirmation & buyer delivery acknowledgement.',
+    katoti_cap_pct: KATOTI_DEDUCTION_CAP_PCT,
+  };
+}
+
 // Canonical JSON hashing for tamper-evident waste passport
 export function hashRecord(record: Record<string, unknown>): string {
   const canonical = JSON.stringify(record, Object.keys(record).sort());
@@ -703,11 +1022,13 @@ export function hashRecord(record: Record<string, unknown>): string {
 
 class SymbiosisEngine {
   facilities: Record<string, Facility>;
+  carriers: Record<string, Carrier>;
   passports: DigitalWastePassport[];
   pipelineResults: PipelineItemResult[];
 
   constructor() {
     this.facilities = getDefaultFacilities();
+    this.carriers = getDefaultCarriers();
     this.passports = [];
     this.pipelineResults = [];
     this.loadPassportsFromFile();
@@ -797,6 +1118,7 @@ class SymbiosisEngine {
 
   reset() {
     this.facilities = getDefaultFacilities();
+    this.carriers = getDefaultCarriers();
     this.passports = [];
     this.pipelineResults = [];
     this.savePassportsToFile();
@@ -807,6 +1129,10 @@ class SymbiosisEngine {
 
   getFacilities() {
     return this.facilities;
+  }
+
+  getCarriers() {
+    return this.carriers;
   }
 
   applySensorReading(
@@ -943,46 +1269,121 @@ Give a unique, authentic tone with practical industrial details. Do NOT output g
   }
 
   async runFullPipeline(): Promise<PipelineItemResult[]> {
-    const candidates = findCandidateMatches(this.facilities);
-    const ranked = await rankCandidates(candidates, this.facilities);
+    // Aggregator / Micro-Lot Pooling Agent runs first so fragmented small
+    // sellers are matched and negotiated as one consolidated consignment.
+    const { pooledFacilities, poolMembership } = poolMicroLotSellers(this.facilities);
+
+    const candidates = findCandidateMatches(pooledFacilities);
+    const ranked = await rankCandidates(candidates, pooledFacilities);
 
     const items: PipelineItemResult[] = [];
     this.passports = []; // fresh ledger run for demo pipeline execution
 
+    // Allocation Auditor Agent: a facility's monthly byproduct output (or intake
+    // capacity) can be claimed by at most one winning deal per run. Without this,
+    // a seller matched to multiple candidate buyers (e.g. one seller, several
+    // eligible offtakers within range) would have its full volume double-counted
+    // across independently-negotiated deals.
+    const allocatedVolume: Record<string, number> = {};
+
+    // Carriers that already ran a route this pipeline run quote their next
+    // job at a backhaul discount (see negotiateFreight/BACKHAUL_DISCOUNT_FACTOR).
+    const carrierTripCount: Record<string, number> = {};
+
     for (const match of ranked) {
-      const seller = this.facilities[match.seller_id];
-      const buyer = this.facilities[match.buyer_id];
+      const seller = pooledFacilities[match.seller_id];
+      const buyer = pooledFacilities[match.buyer_id];
       const volume = Math.min(seller.volume_tons_per_month, buyer.volume_tons_per_month);
 
       const negotiation = await negotiate(seller, buyer, match.material, volume);
 
+      let logisticsDeal: FreightNegotiationResult | null = null;
       let regulatory: RegulatoryDecision | null = null;
       let passport: DigitalWastePassport | null = null;
+      let pooledMembers: PooledMember[] | undefined;
 
       if (negotiation.outcome === 'DEAL') {
-        regulatory = await reviewDeal(seller, buyer, negotiation);
-        if (regulatory.decision === 'APPROVED') {
-          const dealData: PassportDealData = {
-            seller_id: seller.id,
-            buyer_id: buyer.id,
-            material: match.material,
-            volume_tons: volume,
-            agreed_price_per_ton: negotiation.final_price_inr_per_ton,
-            logistics: negotiation.logistics,
-            regulatory_decision: regulatory,
-          };
+        const carrier = selectBestCarrier(this.carriers, volume, seller.hazardous);
+        const isBackhaul = Boolean(carrier && carrierTripCount[carrier.id] > 0);
+        logisticsDeal = await negotiateFreight(
+          carrier,
+          negotiation.logistics,
+          buyer.cost_ceiling_inr_per_ton!,
+          negotiation.final_price_inr_per_ton!,
+          volume,
+          match.material,
+          isBackhaul
+        );
 
-          const { contract, eway_bill, hazard_manifest } = generateCircularContractAndEWayBill(
-            dealData,
-            seller,
-            buyer
-          );
+        if (logisticsDeal.outcome === 'DEAL') {
+          const sellerCommitted = allocatedVolume[seller.id] || 0;
+          const buyerCommitted = allocatedVolume[buyer.id] || 0;
+          const sellerHeadroom = seller.volume_tons_per_month - sellerCommitted;
+          const buyerHeadroom = buyer.volume_tons_per_month - buyerCommitted;
+          const ALLOCATION_TOLERANCE = 0.01;
 
-          dealData.contract = contract;
-          dealData.eway_bill = eway_bill;
-          dealData.hazard_manifest = hazard_manifest;
+          if (volume > sellerHeadroom + ALLOCATION_TOLERANCE || volume > buyerHeadroom + ALLOCATION_TOLERANCE) {
+            regulatory = {
+              decision: 'VETOED',
+              rule_applied: 'Cross-Deal Allocation Audit (Auditor Agent)',
+              explanation: `Blocked: this deal claims ${volume} tons, but only ${Math.max(0, Math.min(sellerHeadroom, buyerHeadroom)).toFixed(1)} tons of unclaimed monthly capacity remain after volume already committed to other approved deals in this run (seller headroom ${sellerHeadroom.toFixed(1)}t, buyer headroom ${buyerHeadroom.toFixed(1)}t).`,
+            };
+          } else {
+            regulatory = await reviewDeal(seller, buyer, negotiation, carrier);
+            if (regulatory.decision === 'APPROVED') {
+              const dealData: PassportDealData = {
+                seller_id: seller.id,
+                buyer_id: buyer.id,
+                material: match.material,
+                volume_tons: volume,
+                agreed_price_per_ton: negotiation.final_price_inr_per_ton,
+                logistics: negotiation.logistics,
+                regulatory_decision: regulatory,
+                logistics_deal: {
+                  carrier_id: logisticsDeal.carrier_id!,
+                  carrier_name: logisticsDeal.carrier_name!,
+                  vehicle_type: logisticsDeal.vehicle_type!,
+                  agreed_rate_inr_per_ton_km: logisticsDeal.final_rate_inr_per_ton_km!,
+                  total_freight_cost_inr: logisticsDeal.total_freight_cost_inr!,
+                  negotiation_rounds: logisticsDeal.rounds,
+                },
+              };
 
-          passport = this.issuePassport(dealData);
+              const { contract, eway_bill, hazard_manifest } = generateCircularContractAndEWayBill(
+                dealData,
+                seller,
+                buyer
+              );
+
+              dealData.contract = contract;
+              dealData.eway_bill = eway_bill;
+              dealData.hazard_manifest = hazard_manifest;
+              dealData.settlement = buildSettlementRecord(contract.total_invoice_inr);
+
+              const members = poolMembership[seller.id];
+              if (members) {
+                pooledMembers = members.map((m) => {
+                  const sharePct = Math.round((m.volume_tons / volume) * 1000) / 10;
+                  const freightShare = Math.round((logisticsDeal!.total_freight_cost_inr! * m.volume_tons) / volume);
+                  const grossRevenue = Math.round((negotiation.final_price_inr_per_ton || 0) * m.volume_tons);
+                  return {
+                    facility_id: m.facility_id,
+                    facility_name: this.facilities[m.facility_id]?.name || m.facility_id,
+                    volume_tons: m.volume_tons,
+                    share_pct: sharePct,
+                    freight_share_inr: freightShare,
+                    net_payout_inr: grossRevenue - freightShare,
+                  };
+                });
+                dealData.pooled_members = pooledMembers;
+              }
+
+              passport = this.issuePassport(dealData);
+              allocatedVolume[seller.id] = sellerCommitted + volume;
+              allocatedVolume[buyer.id] = buyerCommitted + volume;
+              if (carrier) carrierTripCount[carrier.id] = (carrierTripCount[carrier.id] || 0) + 1;
+            }
+          }
         }
       }
 
@@ -991,8 +1392,11 @@ Give a unique, authentic tone with practical industrial details. Do NOT output g
         seller,
         buyer,
         negotiation,
+        logistics_deal: logisticsDeal,
         regulatory,
         passport,
+        pooled_members: pooledMembers || null,
+        is_pooled_consignment: Boolean(poolMembership[seller.id]),
       });
     }
 

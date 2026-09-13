@@ -25,6 +25,16 @@ async function startServer() {
     }
   });
 
+  // Get all registered logistics carriers
+  app.get('/api/carriers', (req, res) => {
+    try {
+      const carriers = engine.getCarriers();
+      res.json({ carriers });
+    } catch (err: any) {
+      res.status(500).json({ error: err?.message || 'Failed to fetch carriers' });
+    }
+  });
+
   // Get KSPCB CAAQMS monitoring stations & CSTEP emission inventory summary
   app.get('/api/caaqms', (req, res) => {
     try {
