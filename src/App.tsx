@@ -206,7 +206,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfaf6] bg-dot-pattern text-stone-900 flex flex-col font-sans selection:bg-[#ff5d02] selection:text-white">
+    <div className="min-h-screen bg-background bg-dot-pattern text-foreground flex flex-col font-sans selection:bg-[#ff5d02] selection:text-white">
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -222,7 +222,7 @@ export function App() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {loading ? (
-          <div className="flex items-center justify-center py-24 text-stone-600 text-sm font-medium">
+          <div className="flex items-center justify-center py-24 text-muted-foreground text-sm font-medium">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ea580c] mr-3"></div>
             Loading Karnataka industrial symbiosis network & real entity models...
           </div>
@@ -276,9 +276,9 @@ export function App() {
         )}
       </main>
 
-      <footer className="border-t border-orange-200/70 bg-white/90 backdrop-blur-xs py-6 px-4 sm:px-6">
+      <footer className="border-t border-orange-200/70 dark:border-orange-800/60 bg-card/90 backdrop-blur-xs py-6 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500 font-medium">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground/70 font-medium">
             <div>
               SCM - Swalpa Circular Maadi • Industrial Byproduct Symbiosis Network across Karnataka
             </div>
@@ -286,34 +286,34 @@ export function App() {
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setIsLimitationsModalOpen(true)}
-                className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-950 font-semibold border border-stone-200 transition"
+                className="px-3 py-1.5 rounded-lg bg-muted hover:bg-orange-100 dark:hover:bg-orange-950/40 text-muted-foreground hover:text-orange-950 dark:hover:text-orange-300 font-semibold border border-border transition"
               >
                 Honest Limitations (Simulated vs Production)
               </button>
               <button
                 onClick={() => setIsStandardsModalOpen(true)}
-                className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-950 font-semibold border border-stone-200 transition"
+                className="px-3 py-1.5 rounded-lg bg-muted hover:bg-orange-100 dark:hover:bg-orange-950/40 text-muted-foreground hover:text-orange-950 dark:hover:text-orange-300 font-semibold border border-border transition"
               >
                 Regulatory Rules (KSPCB / CPCB)
               </button>
               <button
                 onClick={() => setIsGlossaryModalOpen(true)}
-                className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-950 font-semibold border border-stone-200 transition"
+                className="px-3 py-1.5 rounded-lg bg-muted hover:bg-orange-100 dark:hover:bg-orange-950/40 text-muted-foreground hover:text-orange-950 dark:hover:text-orange-300 font-semibold border border-border transition"
               >
                 Glossary
               </button>
             </div>
           </div>
 
-          <div className="pt-3 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-stone-400">
+          <div className="pt-3 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-muted-foreground/70">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="font-semibold text-stone-600">Cloud Firestore Powered</span>
+              <span className="font-semibold text-muted-foreground">Cloud Firestore Powered</span>
               <span className="text-stone-300">•</span>
               <span>Persistent storage for factory registry, IoT telemetry & digital waste passports</span>
             </div>
-            <div className="font-mono text-[10px] text-stone-400">
-              Database: <span className="text-stone-600 font-semibold">ai-studio-bitnbuild-5551f14b-01d5-42ac-a55e-e81c35b3926f</span>
+            <div className="font-mono text-[10px] text-muted-foreground/70">
+              Database: <span className="text-muted-foreground font-semibold">ai-studio-bitnbuild-5551f14b-01d5-42ac-a55e-e81c35b3926f</span>
             </div>
           </div>
         </div>

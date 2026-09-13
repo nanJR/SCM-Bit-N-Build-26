@@ -1,5 +1,7 @@
 import React from 'react';
-import { X, AlertCircle, CheckCircle2, ArrowRight, ShieldCheck, Scale, Compass, FileText } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ShieldCheck, Scale, Compass, FileText } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog';
+import { Button } from './ui/button';
 
 interface HonestLimitationsModalProps {
   isOpen: boolean;
@@ -7,8 +9,6 @@ interface HonestLimitationsModalProps {
 }
 
 export const HonestLimitationsModal: React.FC<HonestLimitationsModalProps> = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
-
   const limitations = [
     {
       dimension: 'Material Chemistry Compatibility',
@@ -45,68 +45,55 @@ export const HonestLimitationsModal: React.FC<HonestLimitationsModalProps> = ({ 
   ];
 
   return (
-    <div
-      id="honest-limitations-modal"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto"
-      onClick={onClose}
-    >
-      <div
-        className="relative w-full max-w-4xl bg-white border border-orange-200 rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto text-stone-800"
-        onClick={(e) => e.stopPropagation()}
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        id="honest-limitations-modal"
+        className="w-full max-w-4xl rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto"
       >
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-stone-100 pb-4">
-          <div>
-            <div className="flex items-center gap-2 text-[#ea580c]">
-              <AlertCircle className="w-5 h-5" />
-              <span className="text-[11px] font-bold uppercase tracking-wider font-mono">
-                Honest Transparency & Production Reality
-              </span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-black text-stone-900 mt-1">
-              Where the App Falls Short of Production (What's Simulated)
-            </h2>
-            <p className="text-xs sm:text-sm text-stone-600 mt-1">
-              To be completely transparent, here is where this interactive working system diverges from a live enterprise rollout.
-            </p>
+        <DialogHeader className="border-b border-border pb-4">
+          <div className="flex items-center gap-2 text-[#ea580c]">
+            <AlertCircle className="w-5 h-5" />
+            <span className="text-[11px] font-bold uppercase tracking-wider font-mono">
+              Honest Transparency & Production Reality
+            </span>
           </div>
-          <button
-            id="close-limitations-modal-btn"
-            onClick={onClose}
-            className="p-2 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+          <DialogTitle className="text-xl sm:text-2xl font-black text-foreground">
+            Where the App Falls Short of Production (What's Simulated)
+          </DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
+            To be completely transparent, here is where this interactive working system diverges from a live enterprise rollout.
+          </DialogDescription>
+        </DialogHeader>
 
         {/* Limitations Table */}
-        <div className="overflow-x-auto rounded-2xl border border-stone-200">
+        <div className="overflow-x-auto rounded-2xl border border-border">
           <table className="w-full text-left text-xs sm:text-sm border-collapse">
             <thead>
-              <tr className="bg-stone-100 text-stone-700 border-b border-stone-200 font-mono text-xs">
+              <tr className="bg-muted text-muted-foreground border-b border-border font-mono text-xs">
                 <th className="py-3.5 px-4 font-bold uppercase w-1/4">Dimension</th>
-                <th className="py-3.5 px-4 font-bold uppercase w-1/3 text-stone-600">Current App State</th>
+                <th className="py-3.5 px-4 font-bold uppercase w-1/3 text-muted-foreground">Current App State</th>
                 <th className="py-3.5 px-4 font-bold uppercase w-5/12 text-[#ea580c]">Real-World Production Reality</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-200 bg-white">
+            <tbody className="divide-y divide-stone-200 bg-card">
               {limitations.map((item, idx) => {
                 const IconComponent = item.icon;
                 return (
-                  <tr key={idx} className="hover:bg-orange-50/30 transition">
-                    <td className="py-3.5 px-4 font-bold text-stone-900 align-top">
+                  <tr key={idx} className="hover:bg-orange-50/30 dark:hover:bg-orange-950/40 transition">
+                    <td className="py-3.5 px-4 font-bold text-foreground align-top">
                       <div className="flex items-start gap-2">
-                        <IconComponent className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
+                        <IconComponent className="w-4 h-4 text-orange-600 dark:text-orange-300 shrink-0 mt-0.5" />
                         <span>{item.dimension}</span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-stone-600 align-top leading-relaxed text-xs">
-                      <div className="p-2 rounded-lg bg-stone-50 border border-stone-200">
+                    <td className="py-3.5 px-4 text-muted-foreground align-top leading-relaxed text-xs">
+                      <div className="p-2 rounded-lg bg-muted border border-border">
                         {item.currentState}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-stone-800 align-top leading-relaxed text-xs">
-                      <div className="p-2 rounded-lg bg-orange-50/60 border border-orange-200 text-stone-900 font-medium">
+                    <td className="py-3.5 px-4 text-foreground align-top leading-relaxed text-xs">
+                      <div className="p-2 rounded-lg bg-orange-50/60 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 text-foreground font-medium">
                         {item.productionReality}
                       </div>
                     </td>
@@ -118,24 +105,21 @@ export const HonestLimitationsModal: React.FC<HonestLimitationsModalProps> = ({ 
         </div>
 
         {/* Bottom Note */}
-        <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs text-amber-900 leading-relaxed flex items-start gap-3">
-          <CheckCircle2 className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+        <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-300 leading-relaxed flex items-start gap-3">
+          <CheckCircle2 className="w-5 h-5 text-amber-700 dark:text-amber-300 shrink-0 mt-0.5" />
           <div>
             <strong className="font-bold">What IS completely functional in this app:</strong> Deterministic price negotiations that resolve within 5 rounds without hanging, dynamic adjustments when you change moisture and contamination readings, official KSPCB hazardous waste veto logic, and cryptographic SHA-256 chaining that proves records cannot be modified after the fact.
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-xs text-stone-500">
+        <DialogFooter className="!mx-0 !mb-0 !rounded-none !border-0 !bg-transparent !p-0 pt-2 border-t border-border flex-row items-center justify-between text-xs text-muted-foreground/70">
           <span>SCM • Swalpa Circular Maadi</span>
-          <button
-            onClick={onClose}
-            className="px-5 py-2.5 bg-[#ff5d02] hover:bg-[#e04f00] text-white font-bold rounded-xl transition"
-          >
+          <Button onClick={onClose} className="font-bold rounded-xl">
             Understood
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

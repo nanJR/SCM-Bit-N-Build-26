@@ -1,6 +1,8 @@
 import React from 'react';
 import { RotateCcw, Factory, Play, MessageSquareText, BookOpen, ShieldCheck, AlertCircle, HelpCircle, TrendingDown, Droplets, Truck, Sun, Moon } from 'lucide-react';
 import { PipelineItemResult } from '../types';
+import { Button } from './ui/button';
+import { cn } from '../lib/utils';
 
 interface NavbarProps {
   activeTab: 'facilities' | 'fleet' | 'pipeline' | 'transcripts' | 'ledger';
@@ -43,16 +45,24 @@ export const Navbar: React.FC<NavbarProps> = ({
     .reduce((acc, r) => acc + (r.negotiation.volume_tons || 0), 0);
   const sandSavedLiters = sandSavedTons * 625;
 
+  const tabs: { id: NavbarProps['activeTab']; label: string; icon: React.ElementType; idAttr: string }[] = [
+    { id: 'facilities', label: 'Factories', icon: Factory, idAttr: 'nav-facilities-tab' },
+    { id: 'fleet', label: 'Fleet', icon: Truck, idAttr: 'nav-fleet-tab' },
+    { id: 'pipeline', label: 'Match Deals', icon: Play, idAttr: 'nav-pipeline-tab' },
+    { id: 'transcripts', label: 'Negotiations', icon: MessageSquareText, idAttr: 'nav-transcripts-tab' },
+    { id: 'ledger', label: 'Passports', icon: BookOpen, idAttr: 'nav-ledger-tab' },
+  ];
+
   return (
     <header className="sticky top-2.5 z-50 px-3 sm:px-6">
-      <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-md border border-orange-200/80 rounded-2xl sm:rounded-full shadow-[0_4px_20px_rgba(234,88,12,0.06)] px-3.5 sm:px-5 py-2 flex flex-wrap items-center justify-between gap-2.5">
+      <div className="max-w-6xl mx-auto bg-card/95 backdrop-blur-md border border-orange-200/80 dark:border-orange-800/60 rounded-2xl sm:rounded-full shadow-[0_4px_20px_rgba(234,88,12,0.06)] px-3.5 sm:px-5 py-2 flex flex-wrap items-center justify-between gap-2.5">
         {/* Left: Minimalistic App Brand */}
         <div className="flex items-center gap-2">
           <div className="flex flex-col leading-tight">
-            <span id="nav-brand-title" className="font-extrabold text-sm sm:text-base text-stone-900 tracking-tight">
+            <span id="nav-brand-title" className="font-extrabold text-sm sm:text-base text-foreground tracking-tight">
               SCM - Swalpa Circular Maadi
             </span>
-            <span className="text-[11px] sm:text-xs text-orange-600 font-semibold italic">
+            <span className="text-[11px] sm:text-xs text-orange-600 dark:text-orange-300 font-semibold italic">
               Make it circular, eh?
             </span>
           </div>
@@ -62,17 +72,17 @@ export const Navbar: React.FC<NavbarProps> = ({
         {approvedDeals.length > 0 && (
           <button
             onClick={() => setActiveTab('pipeline')}
-            className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 text-[11px] font-mono font-bold transition shadow-2xs group"
+            className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-300 text-[11px] font-mono font-bold transition shadow-2xs group"
             title="Click to view full Karnataka Carbon & Resource Telematics"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span className="flex items-center gap-1">
-              <TrendingDown className="w-3 h-3 text-emerald-600" />
+              <TrendingDown className="w-3 h-3 text-emerald-600 dark:text-emerald-300" />
               {(totalCo2Kg / 1000).toFixed(1)} t CO₂ Avoided
             </span>
             <span className="text-emerald-300">•</span>
-            <span className="flex items-center gap-1 text-blue-800">
-              <Droplets className="w-3 h-3 text-blue-600" />
+            <span className="flex items-center gap-1 text-blue-800 dark:text-blue-300">
+              <Droplets className="w-3 h-3 text-blue-600 dark:text-blue-300" />
               {sandSavedLiters >= 1000 ? `${(sandSavedLiters / 1000).toFixed(0)}k` : sandSavedLiters} L Sand Saved
             </span>
           </button>
@@ -80,92 +90,50 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right: Nav Tabs & Reset Action grouped together at rightmost */}
         <div className="flex items-center gap-2">
-          <nav className="flex items-center gap-1 bg-stone-100/90 p-1 rounded-xl sm:rounded-full border border-stone-200/60 text-xs">
-            <button
-              id="nav-facilities-tab"
-              onClick={() => setActiveTab('facilities')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold rounded-lg sm:rounded-full transition-all ${
-                activeTab === 'facilities'
-                  ? 'bg-[#ff5d02] text-white shadow-xs'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-white/80'
-              }`}
-            >
-              <Factory className="w-3.5 h-3.5" />
-              <span>Factories</span>
-            </button>
-
-            <button
-              id="nav-fleet-tab"
-              onClick={() => setActiveTab('fleet')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold rounded-lg sm:rounded-full transition-all ${
-                activeTab === 'fleet'
-                  ? 'bg-[#ff5d02] text-white shadow-xs'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-white/80'
-              }`}
-            >
-              <Truck className="w-3.5 h-3.5" />
-              <span>Fleet</span>
-            </button>
-
-            <button
-              id="nav-pipeline-tab"
-              onClick={() => setActiveTab('pipeline')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold rounded-lg sm:rounded-full transition-all ${
-                activeTab === 'pipeline'
-                  ? 'bg-[#ff5d02] text-white shadow-xs'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-white/80'
-              }`}
-            >
-              <Play className="w-3.5 h-3.5" />
-              <span>Match Deals</span>
-            </button>
-
-            <button
-              id="nav-transcripts-tab"
-              onClick={() => setActiveTab('transcripts')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold rounded-lg sm:rounded-full transition-all ${
-                activeTab === 'transcripts'
-                  ? 'bg-[#ff5d02] text-white shadow-xs'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-white/80'
-              }`}
-            >
-              <MessageSquareText className="w-3.5 h-3.5" />
-              <span>Negotiations</span>
-            </button>
-
-            <button
-              id="nav-ledger-tab"
-              onClick={() => setActiveTab('ledger')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold rounded-lg sm:rounded-full transition-all ${
-                activeTab === 'ledger'
-                  ? 'bg-[#ff5d02] text-white shadow-xs'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-white/80'
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>Passports</span>
-            </button>
+          <nav className="flex items-center gap-1 bg-muted/90 p-1 rounded-xl sm:rounded-full border border-border/60 text-xs">
+            {tabs.map(({ id, label, icon: Icon, idAttr }) => (
+              <Button
+                key={id}
+                id={idAttr}
+                onClick={() => setActiveTab(id)}
+                variant={activeTab === id ? 'default' : 'ghost'}
+                size="sm"
+                className={cn(
+                  'gap-1.5 rounded-lg sm:rounded-full font-semibold',
+                  activeTab === id
+                    ? 'shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-card/80'
+                )}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{label}</span>
+              </Button>
+            ))}
           </nav>
 
-          <button
+          <Button
             id="reset-state-btn"
             onClick={onReset}
             disabled={resetting}
-            className="p-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-full border border-stone-200 transition disabled:opacity-50"
+            variant="outline"
+            size="icon"
+            className="rounded-full h-8 w-8 text-muted-foreground/70 hover:text-foreground"
             title="Reset simulation data to default"
           >
-            <RotateCcw className={`w-3.5 h-3.5 ${resetting ? 'animate-spin text-orange-600' : ''}`} />
-          </button>
+            <RotateCcw className={cn('w-3.5 h-3.5', resetting && 'animate-spin text-orange-600 dark:text-orange-300')} />
+          </Button>
 
           {onToggleDarkMode && (
-            <button
+            <Button
               id="dark-mode-toggle-btn"
               onClick={onToggleDarkMode}
-              className="p-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-full border border-stone-200 transition"
+              variant="outline"
+              size="icon"
+              className="rounded-full h-8 w-8 text-muted-foreground/70 hover:text-foreground"
               title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-            </button>
+            </Button>
           )}
         </div>
       </div>
