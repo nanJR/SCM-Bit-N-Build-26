@@ -55,46 +55,42 @@ html.dark .bg-dot-pattern {
   background-image: radial-gradient(#2a2620 1.5px, transparent 1.5px);
 }
 
-html.dark .bg-white,
-html.dark .bg-white\/95,
-html.dark .bg-white\/90,
-html.dark .bg-white\/80,
-html.dark .bg-white\/70,
-html.dark .bg-white\/60 {
+html.dark [class*="bg-white"] {
   background-color: #1a1815 !important;
 }
 
-html.dark .bg-stone-50,
-html.dark .bg-stone-50\/40,
-html.dark .bg-stone-50\/50,
-html.dark .bg-stone-100,
-html.dark .bg-orange-50,
-html.dark .bg-orange-50\/40,
-html.dark .bg-orange-50\/50,
-html.dark .bg-orange-50\/60,
-html.dark .bg-orange-50\/80 {
+html.dark [class*="bg-stone-50"],
+html.dark [class*="bg-stone-100"],
+html.dark [class*="bg-orange-50"],
+html.dark [class*="bg-amber-50"] {
   background-color: #221f1a !important;
 }
 
-html.dark .border-stone-100,
-html.dark .border-stone-200,
-html.dark .border-orange-200,
-html.dark .border-orange-200\/80,
-html.dark .border-orange-200\/90 {
+html.dark [class*="border-stone-100"],
+html.dark [class*="border-stone-200"],
+html.dark [class*="border-orange-200"],
+html.dark [class*="border-amber-200"],
+html.dark [class*="border-amber-300"] {
   border-color: #3a352c !important;
 }
 
-html.dark .text-stone-900,
-html.dark .text-stone-800 {
+html.dark [class*="text-stone-900"],
+html.dark [class*="text-stone-800"] {
   color: #f2ede3 !important;
 }
-html.dark .text-stone-700,
-html.dark .text-stone-600 {
+html.dark [class*="text-stone-700"],
+html.dark [class*="text-stone-600"] {
   color: #cabfa9 !important;
 }
-html.dark .text-stone-500,
-html.dark .text-stone-400 {
+html.dark [class*="text-stone-500"],
+html.dark [class*="text-stone-400"] {
   color: #8f8674 !important;
+}
+html.dark [class*="text-orange-900"],
+html.dark [class*="text-orange-950"],
+html.dark [class*="text-amber-800"],
+html.dark [class*="text-amber-900"] {
+  color: #f0b98f !important;
 }
 
 html.dark .shadow-xs,
@@ -109,4 +105,11 @@ html.dark select,
 html.dark textarea {
   background-color: #1a1815 !important;
   color: #f2ede3 !important;
+}
+
+/* Gradient-background cards (bg-gradient-to-*) don't match plain bg-white
+   overrides above -- strip the gradient entirely for a flat dark card. */
+html.dark [class*="bg-gradient-to-"] {
+  background-image: none !important;
+  background-color: #1a1815 !important;
 }

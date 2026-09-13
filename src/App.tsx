@@ -11,7 +11,9 @@ import { GlossaryModal } from './components/GlossaryModal';
 import { Carrier, DigitalWastePassport, Facility, LedgerVerification, PipelineItemResult } from './types';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<'facilities' | 'fleet' | 'pipeline' | 'transcripts' | 'ledger'>('facilities');
+  const [activeTab, setActiveTab] = useState<'facilities' | 'fleet' | 'pipeline' | 'transcripts' | 'ledger'>(
+    (new URLSearchParams(window.location.search).get('tab') as any) || 'facilities'
+  );
   const [isStandardsModalOpen, setIsStandardsModalOpen] = useState<boolean>(false);
   const [isLimitationsModalOpen, setIsLimitationsModalOpen] = useState<boolean>(false);
   const [isGlossaryModalOpen, setIsGlossaryModalOpen] = useState<boolean>(false);
@@ -28,6 +30,7 @@ export function App() {
   const [verifying, setVerifying] = useState<boolean>(false);
   const [selectedTranscriptIndex, setSelectedTranscriptIndex] = useState<number>(0);
   const [darkMode, setDarkMode] = useState<boolean>(() => {
+    if (window.location.hash === '#dark') return true;
     try {
       return localStorage.getItem('scm-dark-mode') === '1';
     } catch {
