@@ -27,6 +27,22 @@ export function App() {
   const [resetting, setResetting] = useState<boolean>(false);
   const [verifying, setVerifying] = useState<boolean>(false);
   const [selectedTranscriptIndex, setSelectedTranscriptIndex] = useState<number>(0);
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('scm-dark-mode') === '1';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    try {
+      localStorage.setItem('scm-dark-mode', darkMode ? '1' : '0');
+    } catch {
+      // ignore
+    }
+  }, [darkMode]);
 
   // Fetch initial facilities and ledger state
   const loadInitialData = async () => {
@@ -197,6 +213,8 @@ export function App() {
         onOpenLimitations={() => setIsLimitationsModalOpen(true)}
         onOpenGlossary={() => setIsGlossaryModalOpen(true)}
         results={results}
+        darkMode={darkMode}
+        onToggleDarkMode={() => setDarkMode((d) => !d)}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">

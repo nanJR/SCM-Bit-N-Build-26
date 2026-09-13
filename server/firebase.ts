@@ -64,13 +64,16 @@ export async function syncFacilitiesWithFirestore(
       return defaultFacilities;
     }
 
-    const loaded: Record<string, Facility> = {};
+    // Merge onto the full default seed set rather than replacing it -- a
+    // Firestore collection holding only a few previously-synced/edited
+    // facilities must not blow away the rest of the seeded demo dataset.
+    const loaded: Record<string, Facility> = { ...defaultFacilities };
     snap.forEach((d) => {
       const data = d.data() as Facility;
       loaded[data.id] = data;
     });
 
-    console.log(`Loaded ${Object.keys(loaded).length} facilities from live Firestore.`);
+    console.log(`Merged ${snap.size} facilities from live Firestore onto ${Object.keys(defaultFacilities).length} defaults.`);
     return loaded;
   } catch (err) {
     console.warn('Failed to sync facilities with Firestore, using local defaults:', err);

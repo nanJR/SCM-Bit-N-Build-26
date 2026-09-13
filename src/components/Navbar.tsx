@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw, Factory, Play, MessageSquareText, BookOpen, ShieldCheck, AlertCircle, HelpCircle, TrendingDown, Droplets, Truck } from 'lucide-react';
+import { RotateCcw, Factory, Play, MessageSquareText, BookOpen, ShieldCheck, AlertCircle, HelpCircle, TrendingDown, Droplets, Truck, Sun, Moon } from 'lucide-react';
 import { PipelineItemResult } from '../types';
 
 interface NavbarProps {
@@ -11,6 +11,8 @@ interface NavbarProps {
   onOpenLimitations?: () => void;
   onOpenGlossary?: () => void;
   results?: PipelineItemResult[];
+  darkMode?: boolean;
+  onToggleDarkMode?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -22,6 +24,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenLimitations,
   onOpenGlossary,
   results = [],
+  darkMode = false,
+  onToggleDarkMode,
 }) => {
   const approvedDeals = results.filter(
     (r) => r.negotiation.outcome === 'DEAL' && r.regulatory?.decision === 'APPROVED'
@@ -152,6 +156,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <RotateCcw className={`w-3.5 h-3.5 ${resetting ? 'animate-spin text-orange-600' : ''}`} />
           </button>
+
+          {onToggleDarkMode && (
+            <button
+              id="dark-mode-toggle-btn"
+              onClick={onToggleDarkMode}
+              className="p-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-full border border-stone-200 transition"
+              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            </button>
+          )}
         </div>
       </div>
     </header>

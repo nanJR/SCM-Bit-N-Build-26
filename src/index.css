@@ -38,3 +38,75 @@ code, kbd, samp, pre {
   border: 1px solid rgba(253, 186, 116, 0.6);
   border-radius: 1.25rem;
 }
+
+/* Quick dark theme: broad utility-class overrides via a .dark ancestor,
+   rather than adding dark: variants to every component individually. */
+html.dark, html.dark body {
+  background-color: #0f0e0c;
+  color: #e7e3dc;
+  color-scheme: dark;
+}
+
+html.dark .bg-\[\#fcfaf6\],
+html.dark .bg-dot-pattern {
+  background-color: #0f0e0c;
+}
+html.dark .bg-dot-pattern {
+  background-image: radial-gradient(#2a2620 1.5px, transparent 1.5px);
+}
+
+html.dark .bg-white,
+html.dark .bg-white\/95,
+html.dark .bg-white\/90,
+html.dark .bg-white\/80,
+html.dark .bg-white\/70,
+html.dark .bg-white\/60 {
+  background-color: #1a1815 !important;
+}
+
+html.dark .bg-stone-50,
+html.dark .bg-stone-50\/40,
+html.dark .bg-stone-50\/50,
+html.dark .bg-stone-100,
+html.dark .bg-orange-50,
+html.dark .bg-orange-50\/40,
+html.dark .bg-orange-50\/50,
+html.dark .bg-orange-50\/60,
+html.dark .bg-orange-50\/80 {
+  background-color: #221f1a !important;
+}
+
+html.dark .border-stone-100,
+html.dark .border-stone-200,
+html.dark .border-orange-200,
+html.dark .border-orange-200\/80,
+html.dark .border-orange-200\/90 {
+  border-color: #3a352c !important;
+}
+
+html.dark .text-stone-900,
+html.dark .text-stone-800 {
+  color: #f2ede3 !important;
+}
+html.dark .text-stone-700,
+html.dark .text-stone-600 {
+  color: #cabfa9 !important;
+}
+html.dark .text-stone-500,
+html.dark .text-stone-400 {
+  color: #8f8674 !important;
+}
+
+html.dark .shadow-xs,
+html.dark .shadow-sm,
+html.dark .shadow-2xs,
+html.dark .shadow-md {
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #1a1815 !important;
+  color: #f2ede3 !important;
+}
