@@ -1,159 +1,258 @@
 # SCM - Swalpa Circular Maadi (Make it circular, eh?)
 
-> **Karnataka Industrial Byproduct Symbiosis & Autonomous Waste-to-Resource Negotiation Network**  
-> *Built for Bit N Build '26 — Supply Chain Circularity & Industrial Symbiosis*
+> **Autonomous Multi-Agent Network for Industrial Symbiosis, Bilateral Deal Negotiation & Digital Waste Passports across Karnataka's Manufacturing Corridors**  
+> *Built for Bit N Build '26 — Track: Supply Chain Circularity & Industrial Symbiosis*
 
 ---
 
-##  Overview
+##  Executive Summary
 
-Karnataka is drafting India’s first state-level circular economy framework. However, on the ground across major Karnataka MSME industrial estates (Peenya, Bidadi, Dobaspet, Harohalli, Tumkur, Bommasandra, Whitefield), thousands of factories generate hazardous and non-hazardous byproducts—such as fly ash, steel slag, used lubricants, electroplating chrome sludge, demolition rubble, and cotton yarn waste.
+Karnataka is home to over 600,000 MSME factories clustered across dense manufacturing belts like **Peenya, Bidadi, Dobaspet, Harohalli, Tumkur, Bommasandra, and Whitefield**. While Karnataka works on India’s first state-level circular economy framework, factory operators face four structural barriers on the ground:
 
-Currently, factory owners lack an automated, compliant, and geographically feasible mechanism to exchange byproducts with nearby industrial buyers before they become costly disposal burdens or pollution hazards.
+1. **Geographic Infeasibility**: High transport logistics costs make moving heavy, low-value industrial byproducts over long distances uneconomical.
+2. **Opaque Price Discovery**: Lack of automated, bilateral price discovery between plants generating byproducts and those requiring raw materials.
+3. **Severe Regulatory Risk**: Non-compliance with **KSPCB (Karnataka State Pollution Control Board)** mandates and **Hazardous Waste Rules 2016** leads to illicit dumping or hefty penalties.
+4. **Zero Chain of Custody**: Recycled and diverted materials lack tamper-proof provenance for regulatory credit and carbon accounting.
 
-**SCM (Swalpa Circular Maadi)** solves this with a **hierarchical multi-agent system**:
-- **Autonomous Matching**: Geospatial radius filtering (≤60 km) and material compatibility matching.
-- **Monotonic Concession Negotiations**: Deadline-bound bilateral bargaining with private cost floors/ceilings.
-- **KSPCB Supervisory Veto**: Automated compliance checks against Karnataka State Pollution Control Board (KSPCB) and CPCB environmental guidelines.
-- **Digital Waste Passports**: Immutable, tamper-evident SHA-256 hash-chained ledger storing audited transaction blocks.
-- **Statutory Paperwork Generation**: GST E-Way Bills (INS-01), Purchase Orders (PO), and Hazardous Waste Manifests (Form 10).
+**SCM (Swalpa Circular Maadi)** is an autonomous, hierarchical multi-agent platform that matches industrial byproducts within economically viable corridors (up to 60 km), executes bilateral price negotiations using an autonomous **Monotonic Concession Protocol**, enforces supervisory **KSPCB environmental vetos**, and mints **SHA-256 hash-chained Digital Waste Passports** accompanied by automated statutory compliance paperwork.
 
 ---
 
-##  Architecture & Multi-Agent Flow
+##  Multi-Agent Architecture & System Topology
 
 ```
-┌────────────────────────────────────────────────────────┐
-│   Karnataka MSME Factories Directory & IoT Telemetry    │
-│   (Peenya, Bidadi, Dobaspet, Harohalli, Tumkur, etc.)  │
-└───────────────────────────┬────────────────────────────┘
-                            │
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│             Autonomous Matchmaker Agent                │
-│  - Geodesic distance (≤60km corridor filter)           │
-│  - Cross-industry byproduct-to-input matrix            │
-└───────────────────────────┬────────────────────────────┘
-                            │
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│            Bilateral Negotiation Agents                │
-│  - Monotonic Concession Protocol (Rounds 1–5)          │
-│  - Strict private seller floor & buyer ceiling         │
-│  - Natural-language reasoning powered by Gemini 2.5    │
-└───────────────────────────┬────────────────────────────┘
-                            │
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│               KSPCB Regulatory Agent                   │
-│  - Supervisory veto power over all agreed deals        │
-│  - Hazardous Waste Rules 2016 & C&D Waste Rules 2016   │
-└─────────────┬───────────────────────────┬──────────────┘
-              │ APPROVED                  │ VETOED
-              ▼                           ▼
-┌───────────────────────────┐   ┌────────────────────────┐
-│   Digital Waste Passport  │   │  Audit Flag Recorded   │
-│   - SHA-256 Hash Chain    │   │  - Veto Reason Logged  │
-│   - PO & GST E-Way Bill   │   │  - No Deal Executed    │
-│   - Form 10 Haz-Manifest  │   └────────────────────────┘
-└───────────────────────────┘
++------------------------------------------------------------------------+
+|               Karnataka Industrial Plants & IoT Telemetry              |
+|       (Peenya, Bidadi, Dobaspet, Harohalli, Tumkur, Bommasandra)       |
+|           * Real-time hopper moisture %  * Contamination flags         |
++-----------------------------------+------------------------------------+
+                                    |
+                                    v
++------------------------------------------------------------------------+
+|                       1. MATCHMAKER AGENT                              |
+|       * Geodesic distance calculation with 1.25x road circuity factor  |
+|       * Strict 60 km spatial corridor boundary (break-even freight)    |
+|       * Cross-industry byproduct-to-raw-material compatibility matrix  |
++-----------------------------------+------------------------------------+
+                                    |
+                                    v
++------------------------------------------------------------------------+
+|                  2. BILATERAL COMMERCIAL AGENTS                        |
+|       * Seller Agent (Facility operations, cost floor preservation)    |
+|       * Buyer Agent (Procurement manager, virgin raw parity ceiling)   |
+|       * Deterministic Monotonic Concession Protocol (Rounds 1 to 5)    |
+|       * Contextual B2B dialogue generated by Gemini 2.5 Flash          |
++-----------------------------------+------------------------------------+
+                                    |
+                                    v
++------------------------------------------------------------------------+
+|                   3. LOGISTICS & FLEET CARRIER AGENT                   |
+|       * Evaluates local carrier base depots & vehicle tonnage capacity |
+|       * Checks mandatory Hazmat Transport Licensing for toxic cargo    |
+|       * Bilateral freight rate negotiation against remaining margin    |
++-----------------------------------+------------------------------------+
+                                    |
+                                    v
++------------------------------------------------------------------------+
+|                  4. SUPERVISORY KSPCB REGULATORY AGENT                 |
+|       * Hierarchical veto power over commercially agreed deals         |
+|       * Validates Red / Orange / Green Consent for Operation (CFO)     |
+|       * Enforces Hazardous Waste Rules 2016 & C&D Waste Rules 2016     |
++-------------------+--------------------------------+-------------------+
+                    |                                |
+            APPROVED|                                |VETOED
+                    v                                v
++----------------------------------------+     +-------------------------+
+|   5. DIGITAL WASTE PASSPORT MINTER     |     |   REGULATORY AUDIT LOG  |
+|   * SHA-256 Hash-Chained Ledger        |     |   * Veto reason logged  |
+|   * Genesis block to tip verification  |     |   * Commercial deal     |
+|   * Statutory Paperwork Generation:    |     |     aborted in-flight   |
+|     - GST E-Way Bill (Form INS-01)     |     +-------------------------+
+|     - Standardized B2B Purchase Order  |
+|     - Hazardous Waste Manifest Form 10 |
++----------------------------------------+
 ```
 
 ---
 
-##  Key Features
+##  Comprehensive Feature Catalog
 
-### 1.  Factory Directory & Live IoT Hopper Telemetry
-- Pre-seeded with authentic Karnataka industrial clusters across Bengaluru Urban, Bengaluru Rural, Ramanagara, and Tumkur districts.
-- **Simulated IoT Sensors**: Real-time toggles for material moisture percentage (`%`) and foreign contamination flags.
-- Sensor changes trigger dynamic recalculations of seller cost floors and net usable volume.
-- **AI Facility Assessment**: On-demand environmental audits powered by Gemini.
-- **Factory Onboarding**: Dynamic registration modal for adding new MSME facilities with byproduct specifications and cluster coordinates.
+### 1.  Industrial Facilities Directory & Live IoT Hopper Telemetry
+* **Real Industrial Footprint**: Pre-configured with authentic MSME facilities in Bengaluru Urban, Bengaluru Rural, Ramanagara, and Tumkur districts (for example, *Sri Lakshmi Electroplaters*, *Kudgi Super Thermal Power*, *Deccan Cements*, *Peenya Die Castings*, *Karnataka Precast Innovations*).
+* **Live IoT Sensor Controls**:
+  * **Moisture Percentage Slider**: Simulates hopper moisture readings on byproducts (such as wet fly ash or waterlogged demolition aggregate). High moisture dynamically increases handling penalties and shifts the seller’s reserve price floor.
+  * **Foreign Contamination Flag**: Simulates inline sensor alarms for chemical contaminants. Triggers automated price renegotiation or compliance warnings.
+* **On-Demand AI Facility Assessment**: Click "Assess" on any facility card to trigger a real-time Gemini audit analyzing the plant’s byproduct generation, environmental risk rating, and regional circular opportunities.
+* **Dynamic Facility Onboarding**: Integrated modal to onboard new MSME factories specifying GSTIN, industrial cluster, latitude and longitude coordinates, KSPCB Consent Category (Red, Orange, Green, or White), and byproduct specifications.
 
-### 2.  Autonomous Deal Matching & Carbon Offsets
-- Evaluates candidate pairs against material taxonomy:
-  - *Fly Ash (Class F)* → Cement blending & brick kilns
-  - *Recycled Concrete Aggregate / Rubble* → Base course & non-structural paving
-  - *Used Industrial Lubricant* → Certified re-refineries
-  - *Electroplating Chrome Sludge* → TSDF stabilization / cement co-processing
-  - *Foundry Slag* → High-strength concrete aggregates
-- Calculates real-time carbon offsets (kg CO₂ avoided), sand conservation (liters of river sand saved), and dust mitigation (kg PM10 avoided) based on CSTEP environmental research.
+### 2.  Logistics & Carrier Fleet Management ("The Trucker")
+* **Regional Fleet Tracking**: Displays registered Karnataka commercial carriers (such as *VRL Logistics*, *Spoton Logistics*, *TCI Freight Depot*, *Bangalore Bulk Haulers*).
+* **Vehicle Type & Capacity Filtering**: Dynamically pairs loads with 10-wheelers, 16-wheel tippers, dry powder tankers, flatbeds, and vacuum sludge tankers according to payload requirements.
+* **Hazmat Transport Licensing Verification**: Enforces that only carriers holding a valid Department of Transport and KSPCB Hazardous Waste Transport Authorization can haul Schedule I and II hazardous industrial waste.
 
-### 3.  Bilateral Negotiation Engine & Transcripts
-- Runs an autonomous **Monotonic Concession Protocol** over a 5-round deadline limit.
-- Buyer and seller maintain confidential cost boundaries never revealed to the counterpart.
-- Transparently demonstrates all three realistic market outcomes:
-  - **DEAL**: Concession paths intersect before deadline.
-  - **NO DEAL**: Genuine private floor-ceiling price mismatch with clear conclusion reasoning.
-  - **VETOED**: Commercial agreement reached, but supervisory KSPCB agent vetos uncertified transport.
+### 3.  Autonomous Matchmaker & Pipeline Engine
+* **Corridor-Bounded Geodesic Matching**: Filters all potential trading pairs using a maximum 60 km spatial radius with an authentic 1.25x road circuity coefficient.
+* **Material Compatibility Matrix**:
+  * **Fly Ash (Class F)** matches with Portland Pozzolana Cement (PPC) and autoclaved aerated concrete (AAC) blocks.
+  * **Recycled Concrete Aggregate (C&D Rubble)** matches with Precast paver blocks and sub-base road construction.
+  * **Steel & Foundry Slag** matches with High-strength aggregate replacement in ready-mix concrete.
+  * **Used Industrial Lubricants** matches with KSPCB-authorized re-refining facilities.
+  * **Electroplating Chrome Sludge** matches with Authorized TSDF (Treatment, Storage & Disposal Facility) stabilization.
+* **CSTEP-Grounded Environmental Impact Modeling**:
+  * **Net CO2 Avoided**: Virgin production baseline emissions minus transport diesel emissions.
+  * **River Sand Conserved**: Liters of natural river sand preserved by diverting fly ash and crushed slag.
+  * **Landfill Space Saved**: Cubic meters diverted from municipal and unauthorized dumping grounds.
+  * **Dust Mitigation (PM10 Particulates)**: Quantified particulate reduction preventing ambient air pollution in Karnataka air sheds.
 
-### 4.  Digital Waste Passports & Cryptographic Ledger
-- Each approved industrial deal issues a certified **Digital Waste Passport**.
-- Records are chained using **SHA-256 hashing**, referencing the preceding block’s hash (initiating from a Genesis Block).
-- Built-in cryptographic integrity audit button that traverses the block chain live to verify zero record tampering.
-- Inspectable block payloads and raw JSON state.
+### 4.  Bilateral Negotiation Engine & Audit Transcripts
+* **5-Round Monotonic Concession Protocol**:
+  * Avoids infinite LLM conversational loops by employing a deterministic mathematical curve:
+    * **Seller Offer (Round t)** = `Initial Ask - (Initial Ask - Floor) * (Round / Max Rounds) ^ Alpha`
+    * **Buyer Bid (Round t)** = `Initial Bid + (Ceiling - Initial Bid) * (Round / Max Rounds) ^ Beta`
+  * Strict private floors and ceilings prevent either party from making economically non-viable trades.
+* **Authentic B2B Trade Transcripts**:
+  * Displays round-by-round offers, concessions, counter-arguments, and transport freight bids.
+  * Powered by Gemini 2.5 Flash translating unit economics, moisture penalties, and freight splits into authentic Indian plant manager negotiation speech.
+* **Clear Outcome Classification**:
+  * **DEAL**: Concession trajectories intersect before the Round 5 deadline.
+  * **NO DEAL**: Genuine economic floor-ceiling gap with explicit breakdown of unbridgeable margins.
+  * **VETOED**: Commercial agreement achieved, but intercepted and rejected by the KSPCB supervisory regulatory agent.
 
-### 5.  Statutory Compliance & Document Generation
-- Direct inspection modals for statutory B2B compliance documents:
-  - **GST E-Way Bill (INS-01)** with Karnataka Commercial Taxes Department validation format.
-  - **Standardized B2B Purchase Order (PO)** with unit price, freight split, and payment terms.
-  - **Hazardous Waste Manifest (Form 10)** with mandatory yellow-copy consignment notes and authorized TSDF handler signatures.
+### 5.  Supervisory KSPCB Regulatory Agent
+* **Hierarchical Oversight**: Sits above the commercial matchmaking engine to prevent unauthorized trade of hazardous materials.
+* **Regulatory Checkpoints**:
+  * Verifies buyer possesses a valid **Hazardous Waste Handler Authorization** under *Hazardous Waste Management Rules 2016*.
+  * Checks seller's active **Consent for Operation (Red, Orange, or Green CFO)** with KSPCB.
+  * Validates destination plant pollution category to prevent down-cycling into unmonitored informal operations.
+
+### 6.  Digital Waste Passports on a Cryptographic Ledger
+* **SHA-256 Hash-Chained Blocks**: Every approved circular transaction mints an immutable Digital Waste Passport. Each block cryptographically seals:
+  * Block Index, Timestamp, and Previous Block Hash (`prev_hash`).
+  * Consignor (Seller GSTIN, Cluster) and Consignee (Buyer GSTIN, Cluster).
+  * Material specifications, moisture percentage, and net usable dry tonnage.
+  * Agreed material unit price (INR per ton) and logistics freight split.
+  * Environmental credit certifications (CO2 avoided, river sand conserved).
+* **Live Integrity Verification**: Built-in cryptographic verification engine traverses the ledger from Genesis Block to the chain tip, re-computing SHA-256 hashes in real-time to guarantee zero data tampering.
+
+### 7.  Automated Statutory B2B Paperwork
+Inspectable directly from any Waste Passport block:
+* **Karnataka GST E-Way Bill (Form GST INS-01)**:
+  * Fully formatted with HSN codes, vehicle registration numbers, tax breakdowns (CGST + SGST at 18%), and supplier/recipient GSTINs.
+* **Standard Industrial Purchase Order (PO)**:
+  * Complete commercial contract with agreed payment milestones, moisture penalty clauses, and delivery incoterms.
+* **CPCB / KSPCB Hazardous Waste Manifest (Form 10)**:
+  * Mandatory 7-color copy consignment note under *Hazardous and Other Wastes Rules 2016* featuring transporter endorsements and TSDF facility certifications.
+
+### 8.  Educational & Technical Reference Modals
+* **Architecture & Standards Modal**: In-depth documentation on CSTEP air quality benchmarks (60 km by 60 km Bengaluru air shed), CAAQMS monitoring stations, and emission factors.
+* **Kannada Industrial Glossary**: Explains local vernacular and industry terminology (*Swalpa Circular Maadi*, *Jugaad*, *Peenya Estate*, *Red-CFO*, *Form 10*, *TSDF*).
+* **Honest Limitations & Production Roadmap**: Transparent engineering assessment detailing what is currently simulated (IoT websockets, single-node hash chain) versus what is production-grade (cryptographic math, regulatory rules, Gemini reasoning).
+
+### 9.  Design & Accessibility
+* **Theme Modes**: One-click toggle between **Warm Paper Industrial Light Mode** and **Midnight Foundry Dark Mode** (with `#dark` URL parameter support and localStorage persistence).
+* **Dynamic Navigation**: Tab-based navigation (`?tab=facilities|fleet|pipeline|transcripts|ledger`) with responsive drawer components and modal dialogues.
 
 ---
 
 ##  Technology Stack
 
-| Layer | Technology |
-|---|---|
-| **Frontend** | React 18, Vite 6, Tailwind CSS v4, Framer Motion, Lucide React |
-| **Backend** | Node.js 22, Express 4, TypeScript, tsx, esbuild |
-| **Database** | Google Cloud Firestore (Firebase SDK) with persistent storage |
-| **Generative AI** | Google Gemini 2.5 Flash via `@google/genai` TypeScript SDK (Server-Side) |
-| **Cryptography** | Node.js `crypto` (SHA-256 chain verification) |
-
-
----
-
-
-##  Project Structure
-
-```
-├── data/
-│   └── waste_passports.json      # Initial seed ledger records
-├── server/
-│   ├── data.ts                   # Seed industrial facilities & materials database
-│   ├── engine.ts                 # Multi-agent matching, negotiation & KSPCB rules
-│   ├── firebase.ts               # Cloud Firestore persistence layer
-│   └── gemini.ts                 # Gemini 2.5 Flash server-side integration
-├── src/
-│   ├── components/
-│   │   ├── AddFacilityModal.tsx           # MSME factory onboarding modal
-│   │   ├── ArchitectureStandardsModal.tsx # KSPCB / CPCB standards reference
-│   │   ├── CarbonOffsetCounter.tsx        # Real-time CSTEP emission counters
-│   │   ├── ContractModal.tsx              # PO, GST E-Way Bill & Form 10 viewer
-│   │   ├── FacilitiesTab.tsx              # Factory cards & IoT sensor controllers
-│   │   ├── GlossaryModal.tsx              # Karnataka circular economy dictionary
-│   │   ├── HonestLimitationsModal.tsx     # Simulated vs production analysis
-│   │   ├── LedgerTab.tsx                  # SHA-256 waste passport audit ledger
-│   │   ├── Navbar.tsx                     # Header with live ecological telemetry
-│   │   ├── PipelineTab.tsx                # Autonomous matchmaker & deal pipeline
-│   │   └── TranscriptsTab.tsx             # 5-round negotiation transcripts viewer
-│   ├── utils/
-│   │   └── materials.ts          # Material categorization & badge styling
-│   ├── App.tsx                   # Main SPA state controller
-│   ├── main.tsx                  # React DOM entry point
-│   ├── types.ts                  # Shared TypeScript interfaces & types
-│   └── index.css                 # Tailwind CSS v4 styling rules
-├── server.ts                     # Express server & Vite middleware
-├── firebase-blueprint.json       # Database schema & entity definitions
-├── firestore.rules               # Security rules for Firestore collections
-├── package.json                  # Dependencies and scripts
-├── tsconfig.json                 # TypeScript compiler configuration
-└── vite.config.ts                # Vite frontend bundler configuration
-```
+| Layer | Technology | Purpose |
+|---|---|---|
+| **Frontend UI** | React 18, Vite 6, Tailwind CSS v4 | High-density, responsive industrial command dashboard |
+| **Icons & Motion** | `lucide-react`, `motion` (Framer Motion v13) | Smooth micro-interactions, responsive tabs, and modal animations |
+| **Backend API** | Node.js 22, Express 4, TypeScript | Full-stack server with unified dev and production build |
+| **Runtime & Build** | `tsx`, `esbuild` | Dual-mode serving with zero-bundle-error CJS server build |
+| **Generative AI** | Google Gemini 2.5 Flash via `@google/genai` | Autonomous B2B negotiation reasoning and plant audits |
+| **Cloud Database** | Google Cloud Firestore (Firebase SDK v12) | Persistent multi-session storage for facilities and passports |
+| **Cryptography** | Node.js Native `crypto` | SHA-256 block hashing and tamper-evident ledger validation |
 
 ---
 
-##  License & Acknowledgements
+##  API Reference
 
-Created for **Bit N Build '26** under the Supply Chain Circularity theme. Inspired by the circular industrial ecosystems of Peenya Industrial Estate and the draft Karnataka State Circular Economy Policy.
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/health` | Service health check |
+| `GET` | `/api/facilities` | Fetch all registered Karnataka MSME plants |
+| `POST` | `/api/facilities/add` | Onboard a new facility with Firestore persistence |
+| `POST` | `/api/facilities/sensor` | Update live IoT sensor readings (moisture %, contamination) |
+| `POST` | `/api/facilities/:id/describe` | Trigger on-demand Gemini plant audit and circular assessment |
+| `GET` | `/api/carriers` | Fetch all registered logistics fleets and vehicle specifications |
+| `POST` | `/api/pipeline/run` | Execute full multi-agent pipeline (Matchmaker -> Negotiate -> KSPCB -> Ledger) |
+| `GET` | `/api/pipeline/results` | Retrieve current candidate pairs and deal outcomes |
+| `GET` | `/api/ledger` | Fetch all minted Digital Waste Passports and ledger status |
+| `GET` | `/api/ledger/verify` | Execute full SHA-256 cryptographic chain traversal |
+| `POST` | `/api/reset` | Reset all facilities, sensors, and passports to default seed state |
+| `GET` | `/api/caaqms` | Get CSTEP emission benchmarks and KSPCB air monitoring data |
+| `GET` | `/api/firebase/status` | Verify Cloud Firestore connectivity and active collections |
+
+---
+
+##  Mathematical & Economic Models
+
+All formulas in SCM are straightforward and transparent:
+
+### 1. Spatial Distance & Corridor Limit
+```
+Effective Distance = Direct Geodesic Distance x 1.25 (Road Circuity Factor)
+Maximum Allowed Corridor = 60 km
+```
+Deals are strictly constrained to 60 km or less, representing the break-even transport limit for bulk industrial byproducts where freight would otherwise exceed the value of virgin materials.
+
+### 2. Moisture Penalty Adjustment
+```
+Usable Dry Tonnage = Raw Tonnage x (1 - (Moisture Percentage / 100))
+Adjusted Seller Floor = Base Floor x (1 + (Moisture Percentage x 0.015))
+```
+If a batch contains high moisture (for example, wet fly ash), the net usable dry volume decreases and the seller's handling and drying costs increase proportionally.
+
+### 3. CSTEP Environmental Impact Offsets
+```
+Net CO2 Avoided = (Tonnage x Material Emission Factor) - (Transport Distance x Diesel Emission Factor)
+River Sand Conserved = Tonnage of Fly Ash or Slag x 750 Liters per ton
+```
+
+---
+
+##  Getting Started
+
+### Prerequisites
+- Node.js 20+ or 22+
+- npm 10+
+- (Optional) Gemini API key for live generative dialogues (graceful fallback included)
+
+### Installation & Local Run
+```bash
+# 1. Clone repository
+git clone https://github.com/nanJR/bit-n-build-v2.git
+cd bit-n-build-v2
+
+# 2. Install dependencies
+npm install
+
+# 3. Configure environment variables (optional)
+cp .env.example .env
+# Add GEMINI_API_KEY=your_key_here if running live LLM reasoning
+
+# 4. Start development server (boots on port 3000)
+npm run dev
+
+# 5. Production build and start
+npm run build
+npm start
+```
+
+Open `http://localhost:3000` in your browser to run the platform.
+
+---
+
+## 📜 Regulatory Standards & Guidelines Referenced
+* **Hazardous and Other Wastes (Management and Transboundary Movement) Rules, 2016** (Ministry of Environment, Forest and Climate Change)
+* **Construction and Demolition Waste Management Rules, 2016**
+* **Karnataka State Pollution Control Board (KSPCB)** Categorization of Industries (Red, Orange, Green, White)
+* **Central Pollution Control Board (CPCB)** Guidelines on Co-Processing in Cement Kilns
+* **CSTEP** (Center for Study of Science, Technology and Policy) Bengaluru Air Shed Emission Inventory Report
+
+---
+
+*Made with love for Karnataka's circular industrial future — Swalpa Circular Maadi!*
