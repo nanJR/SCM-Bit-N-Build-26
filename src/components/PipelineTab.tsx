@@ -172,9 +172,9 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
             </div>
 
             <div className="bg-white border border-amber-200 rounded-2xl p-4 shadow-xs">
-              <div className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide font-mono">KSPCB Vetoes</div>
+              <div className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide font-mono">Vetoed / Blocked</div>
               <div className="text-2xl font-black text-amber-600 mt-1">{vetoCount}</div>
-              <div className="text-[10px] text-stone-400">Uncertified handler</div>
+              <div className="text-[10px] text-stone-400">KSPCB rule or capacity audit</div>
             </div>
 
             <div className="bg-white border border-rose-200 rounded-2xl p-4 shadow-xs">
@@ -379,7 +379,9 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                       {statusType === 'deal'
                         ? 'APPROVED DEAL'
                         : statusType === 'vetoed'
-                        ? 'VETOED (KSPCB)'
+                        ? r.regulatory?.rule_applied?.includes('Auditor Agent')
+                          ? 'BLOCKED (ALLOCATION)'
+                          : 'VETOED (KSPCB)'
                         : statusType === 'no_carrier'
                         ? 'NO CARRIER AVAILABLE'
                         : 'NO DEAL'}
@@ -554,7 +556,12 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                         <div className="font-bold flex items-center justify-between gap-1.5 mb-1 text-sm">
                           <div className="flex items-center gap-1.5">
                             <ShieldCheck className="w-4 h-4 text-emerald-700" />
-                            <span>KSPCB Regulatory Supervisor: {r.regulatory.decision}</span>
+                            <span>
+                              {r.regulatory.rule_applied?.includes('Auditor Agent')
+                                ? 'Allocation Auditor Agent'
+                                : 'KSPCB Regulatory Supervisor'}
+                              : {r.regulatory.decision}
+                            </span>
                           </div>
                           {r.regulatory.xgn_consent_status && (
                             <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-white border border-emerald-300 text-emerald-800">
