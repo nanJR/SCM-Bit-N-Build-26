@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { X, BookOpen, Search, HelpCircle, Tag } from 'lucide-react';
+import { BookOpen, Search } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Badge } from './ui/badge';
+import { cn } from '../lib/utils';
 
 interface GlossaryModalProps {
   isOpen: boolean;
@@ -167,8 +172,6 @@ export const GlossaryModal: React.FC<GlossaryModalProps> = ({ isOpen, onClose })
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  if (!isOpen) return null;
-
   const categories = ['all', 'Government & Legal', 'Karnataka Specific', 'Industry & Materials', 'Supply Chain & Tech'];
 
   const filtered = GLOSSARY_TERMS.filter((term) => {
@@ -185,65 +188,50 @@ export const GlossaryModal: React.FC<GlossaryModalProps> = ({ isOpen, onClose })
   });
 
   return (
-    <div
-      id="glossary-modal"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto"
-      onClick={onClose}
-    >
-      <div
-        className="relative w-full max-w-4xl bg-white border border-orange-200 rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto text-stone-800"
-        onClick={(e) => e.stopPropagation()}
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        id="glossary-modal"
+        className="w-full max-w-4xl rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto"
       >
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-stone-100 pb-4">
-          <div>
-            <div className="flex items-center gap-2 text-[#ea580c]">
-              <BookOpen className="w-5 h-5" />
-              <span className="text-[11px] font-bold uppercase tracking-wider font-mono">
-                Index of Abbreviations & Terms
-              </span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-black text-stone-900 mt-1">
-              Plain-English Glossary (No Technical Dictionary Needed)
-            </h2>
-            <p className="text-xs sm:text-sm text-stone-600 mt-1">
-              Clear definitions for all government permits, environmental rules, industrial abbreviations, and local Karnataka terms.
-            </p>
+        <DialogHeader className="border-b border-border pb-4">
+          <div className="flex items-center gap-2 text-[#ea580c]">
+            <BookOpen className="w-5 h-5" />
+            <span className="text-[11px] font-bold uppercase tracking-wider font-mono">
+              Index of Abbreviations & Terms
+            </span>
           </div>
-          <button
-            id="close-glossary-modal-btn"
-            onClick={onClose}
-            className="p-2 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+          <DialogTitle className="text-xl sm:text-2xl font-black text-foreground">
+            Plain-English Glossary (No Technical Dictionary Needed)
+          </DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
+            Clear definitions for all government permits, environmental rules, industrial abbreviations, and local Karnataka terms.
+          </DialogDescription>
+        </DialogHeader>
 
         {/* Search & Filter */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3" />
-            <input
+            <Search className="w-4 h-4 text-muted-foreground/70 absolute left-3.5 top-3 z-10" />
+            <Input
               type="text"
               placeholder="Search abbreviation or term (e.g. GSTIN, KSPCB, XGN, CFO, BBMP)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="pl-9 rounded-xl"
             />
           </div>
           <div className="flex gap-1.5 overflow-x-auto pb-1">
             {categories.map((cat) => (
-              <button
+              <Button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-xl whitespace-nowrap transition ${
-                  selectedCategory === cat
-                    ? 'bg-[#ff5d02] text-white'
-                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                }`}
+                variant={selectedCategory === cat ? 'default' : 'secondary'}
+                size="sm"
+                className="rounded-xl whitespace-nowrap"
               >
                 {cat === 'all' ? 'All Terms' : cat}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -253,38 +241,35 @@ export const GlossaryModal: React.FC<GlossaryModalProps> = ({ isOpen, onClose })
           {filtered.map((item) => (
             <div
               key={item.abbr}
-              className="p-4 rounded-2xl border border-stone-200 bg-stone-50/50 hover:bg-orange-50/30 hover:border-orange-200 transition space-y-2"
+              className="p-4 rounded-2xl border border-border bg-muted/50 hover:bg-orange-50/30 dark:hover:bg-orange-950/40 hover:border-orange-200 dark:hover:border-orange-800/60 transition space-y-2"
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-extrabold text-[#ea580c] font-mono bg-orange-100/80 px-2.5 py-0.5 rounded-lg">
+                <span className="text-sm font-extrabold text-[#ea580c] font-mono bg-orange-100/80 dark:bg-orange-950/40 px-2.5 py-0.5 rounded-lg">
                   {item.abbr}
                 </span>
-                <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider bg-white px-2 py-0.5 rounded border border-stone-200">
+                <Badge variant="outline" className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">
                   {item.category}
-                </span>
+                </Badge>
               </div>
-              <div className="font-bold text-xs sm:text-sm text-stone-900">{item.fullName}</div>
-              <p className="text-xs text-stone-600 leading-relaxed">{item.explanation}</p>
+              <div className="font-bold text-xs sm:text-sm text-foreground">{item.fullName}</div>
+              <p className="text-xs text-muted-foreground leading-relaxed">{item.explanation}</p>
             </div>
           ))}
           {filtered.length === 0 && (
-            <div className="col-span-2 text-center py-10 text-xs text-stone-500">
+            <div className="col-span-2 text-center py-10 text-xs text-muted-foreground/70">
               No matching abbreviation found for "{search}".
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-xs text-stone-500">
+        <DialogFooter className="!mx-0 !mb-0 !rounded-none !border-0 !bg-transparent !p-0 pt-2 border-t border-border flex-row items-center justify-between text-xs text-muted-foreground/70">
           <span>{filtered.length} terms in index</span>
-          <button
-            onClick={onClose}
-            className="px-5 py-2.5 bg-[#ff5d02] hover:bg-[#e04f00] text-white font-bold rounded-xl transition"
-          >
+          <Button onClick={onClose} className="font-bold rounded-xl">
             Done
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

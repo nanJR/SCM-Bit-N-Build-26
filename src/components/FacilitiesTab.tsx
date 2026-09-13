@@ -116,19 +116,19 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Banner Box - Minimalistic Header */}
-      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-5 sm:p-6 shadow-xs">
+      <section className="bg-card rounded-2xl sm:rounded-3xl border border-orange-200/80 dark:border-orange-800/60 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[11px] font-bold text-orange-700 uppercase tracking-wider bg-orange-100 px-2.5 py-0.5 rounded-full">
+              <span className="text-[11px] font-bold text-orange-700 dark:text-orange-300 uppercase tracking-wider bg-orange-100 dark:bg-orange-950/40 px-2.5 py-0.5 rounded-full">
                 Karnataka Factory Network
               </span>
-              <span className="text-xs text-stone-500">16 registered plants & authorized recyclers</span>
+              <span className="text-xs text-muted-foreground/70">16 registered plants & authorized recyclers</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
               Factories & Recyclers Directory
             </h1>
-            <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-4xl leading-normal">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-4xl leading-normal">
               Connect waste-producing factories across Karnataka with authorized recyclers to turn industrial byproducts into secondary raw materials.
             </p>
           </div>
@@ -148,10 +148,10 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
               <button
                 id="header-rules-btn"
                 onClick={onOpenStandards}
-                className="bg-white hover:bg-orange-50 border border-orange-200 hover:border-orange-300 text-stone-800 hover:text-orange-950 font-bold px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-xs transition flex items-center justify-center gap-2 w-full sm:w-auto"
+                className="bg-card hover:bg-orange-50 dark:hover:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 hover:border-orange-300 dark:hover:border-orange-800/60 text-foreground hover:text-orange-950 dark:hover:text-orange-300 font-bold px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-xs transition flex items-center justify-center gap-2 w-full sm:w-auto"
                 title="View KSPCB, CPCB C&D 2016 and environmental standards"
               >
-                <FileCheck2 className="w-4 h-4 text-orange-600" />
+                <FileCheck2 className="w-4 h-4 text-orange-600 dark:text-orange-300" />
                 <span>Rules & Standards</span>
               </button>
             )}
@@ -160,27 +160,27 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
       </section>
 
       {/* Box 1: Search & Filter Box (matching "FIND MY DETAILS / Search by Student ID" in reference) */}
-      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-6 shadow-sm">
+      <section className="bg-card rounded-2xl sm:rounded-3xl border border-orange-200/80 dark:border-orange-800/60 p-6 shadow-sm">
         <div className="text-xs font-black tracking-wider text-[#ea580c] uppercase mb-1.5 font-mono">
           DIRECTORY SEARCH
         </div>
-        <h2 className="text-lg sm:text-xl font-bold text-stone-900 mb-1">
+        <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1">
           Search Registered Industries & Authorized Recyclers
         </h2>
-        <p className="text-xs sm:text-sm text-stone-500 mb-4">
+        <p className="text-xs sm:text-sm text-muted-foreground/70 mb-4">
           Search by company name, KSPCB XGN consent ID, byproduct category (e.g. Recycled Concrete Aggregate, Used Oil, Fly Ash), or industrial zone.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-muted-foreground/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               id="facilities-search-input"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="e.g. Rock Crystals, Peenya, C&D Aggregate"
-              className="w-full pl-10 pr-4 py-2.5 bg-stone-50/70 border border-stone-200 rounded-xl text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:bg-white transition"
+              className="w-full pl-10 pr-4 py-2.5 bg-muted/70 border border-border rounded-xl text-sm text-foreground placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-400 dark:focus:ring-orange-800/40 focus:bg-card transition"
             />
           </div>
           <button
@@ -192,7 +192,7 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="px-4 py-2.5 text-xs text-stone-600 hover:text-stone-900 border border-stone-200 rounded-xl bg-stone-50 transition"
+              className="px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground border border-border rounded-xl bg-muted transition"
             >
               Clear
             </button>
@@ -200,9 +200,9 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
         </div>
 
         {/* Filter Badges */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mt-4 pt-3 border-t border-stone-100">
+        <div className="flex flex-wrap items-center justify-between gap-3 mt-4 pt-3 border-t border-border">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-xs font-medium text-stone-500 mr-1">Role:</span>
+            <span className="text-xs font-medium text-muted-foreground/70 mr-1">Role:</span>
             {(['all', 'seller', 'buyer'] as const).map((r) => (
               <button
                 key={r}
@@ -210,7 +210,7 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
                 className={`px-3 py-1 rounded-full text-xs font-semibold capitalize transition ${
                   filterRole === r
                     ? 'bg-[#ff5d02] text-white shadow-xs'
-                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                    : 'bg-muted text-muted-foreground hover:bg-stone-200'
                 }`}
               >
                 {r === 'all' ? 'All Roles' : `${r}s`}
@@ -222,7 +222,7 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="text-xs bg-stone-50 border border-stone-200 text-stone-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-orange-400"
+              className="text-xs bg-muted border border-border text-muted-foreground rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-orange-400 dark:focus:border-orange-800/60"
             >
               <option value="all">All Materials</option>
               <option value="recycled_concrete_aggregate">C&D Aggregate (RCA)</option>
@@ -239,11 +239,11 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
               onClick={() => setFilterHazardous(!filterHazardous)}
               className={`text-xs px-3 py-1 rounded-full border flex items-center gap-1.5 transition font-medium ${
                 filterHazardous
-                  ? 'bg-amber-100 border-amber-300 text-amber-900 font-semibold'
-                  : 'bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100'
+                  ? 'bg-amber-100 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 font-semibold'
+                  : 'bg-muted border-border text-muted-foreground hover:bg-muted'
               }`}
             >
-              <ShieldAlert className="w-3 h-3 text-amber-600" />
+              <ShieldAlert className="w-3 h-3 text-amber-600 dark:text-amber-300" />
               Hazardous Only
             </button>
           </div>
@@ -251,16 +251,16 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
       </section>
 
       {/* Box 2: IoT Sensor Telemetry Card (matching "SIP FEEDBACK" in reference image) */}
-      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-6 shadow-sm">
+      <section className="bg-card rounded-2xl sm:rounded-3xl border border-orange-200/80 dark:border-orange-800/60 p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
           <div>
             <div className="text-xs font-black tracking-wider text-[#ea580c] uppercase mb-1.5 font-mono">
               IOT TELEMETRY & CAAQMS TRIGGER
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-stone-900">
+            <h2 className="text-lg sm:text-xl font-bold text-foreground">
               Live Facility IoT Quality Sensor & Air-Shed Simulation
             </h2>
-            <p className="text-xs sm:text-sm text-stone-500">
+            <p className="text-xs sm:text-sm text-muted-foreground/70">
               Simulate sensor events (moisture variations, contamination flags, or CAAQMS ambient spikes) to observe Facility Agents autonomously adjust cost floors and usable volumes.
             </p>
           </div>
@@ -275,16 +275,16 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-orange-50/40 p-4 rounded-2xl border border-orange-100">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-orange-50/40 dark:bg-orange-950/40 p-4 rounded-2xl border border-orange-100 dark:border-orange-800/60">
           <div>
-            <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
               Target Industrial Facility
             </label>
             <select
               id="sensor-facility-select"
               value={selectedFacilityId}
               onChange={(e) => setSelectedFacilityId(e.target.value)}
-              className="w-full bg-white border border-stone-200 text-stone-800 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-orange-400 focus:outline-none"
+              className="w-full bg-card border border-border text-foreground text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-orange-400 dark:focus:ring-orange-800/40 focus:outline-none"
             >
               {facilityList.map((f) => (
                 <option key={f.id} value={f.id}>
@@ -296,10 +296,10 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
 
           <div>
             <div className="flex justify-between items-center mb-1.5">
-              <label className="text-xs font-semibold text-stone-700">
+              <label className="text-xs font-semibold text-muted-foreground">
                 Moisture Content: <span className="text-[#ea580c] font-bold">{moisture}%</span>
               </label>
-              <span className="text-[10px] text-stone-500">&gt;15% triggers 15% discount</span>
+              <span className="text-[10px] text-muted-foreground/70">&gt;15% triggers 15% discount</span>
             </div>
             <input
               id="sensor-moisture-slider"
@@ -313,16 +313,16 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
           </div>
 
           <div className="flex items-center">
-            <label className="flex items-center gap-2.5 cursor-pointer p-2 rounded-xl bg-white border border-stone-200 hover:border-orange-300 w-full transition">
+            <label className="flex items-center gap-2.5 cursor-pointer p-2 rounded-xl bg-card border border-border hover:border-orange-300 dark:hover:border-orange-800/60 w-full transition">
               <input
                 id="sensor-contamination-checkbox"
                 type="checkbox"
                 checked={contamination}
                 onChange={(e) => setContamination(e.target.checked)}
-                className="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 accent-[#ff5d02]"
+                className="w-4 h-4 rounded text-orange-600 dark:text-orange-300 focus:ring-orange-500 dark:focus:ring-orange-800/40 accent-[#ff5d02]"
               />
-              <span className="text-xs font-medium text-stone-800 flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+              <span className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-300 shrink-0" />
                 <span>Contamination Alert (Halves usable volume)</span>
               </span>
             </label>
@@ -330,8 +330,8 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
         </div>
 
         {sensorSuccessMsg && (
-          <div className="mt-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+          <div className="mt-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-300" />
             <span>{sensorSuccessMsg}</span>
           </div>
         )}
@@ -340,10 +340,10 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
       {/* Facility Grid Cards */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-stone-900">
+          <h2 className="text-lg font-bold text-foreground">
             Verified Participating Facilities ({filteredFacilities.length})
           </h2>
-          <span className="text-xs text-stone-500 font-mono">
+          <span className="text-xs text-muted-foreground/70 font-mono">
             KSPCB XGN Database Records
           </span>
         </div>
@@ -352,49 +352,49 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
           {filteredFacilities.map((f) => (
             <div
               key={f.id}
-              className="bg-white rounded-2xl border border-orange-200/80 p-5 shadow-xs hover:shadow-md transition flex flex-col justify-between"
+              className="bg-card rounded-2xl border border-orange-200/80 dark:border-orange-800/60 p-5 shadow-xs hover:shadow-md transition flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-700">
+                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
                     {f.id}
                   </span>
                   <span
                     className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
                       f.role === 'seller'
-                        ? 'bg-amber-100 text-amber-900 border border-amber-200'
-                        : 'bg-emerald-100 text-emerald-900 border border-emerald-200'
+                        ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60'
+                        : 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
                     }`}
                   >
                     {f.role}
                   </span>
                 </div>
 
-                <h3 className="font-bold text-base text-stone-900 leading-snug">
+                <h3 className="font-bold text-base text-foreground leading-snug">
                   {f.name}
                 </h3>
 
-                <div className="flex items-center gap-1 text-xs text-stone-500 mt-1">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground/70 mt-1">
                   <MapPin className="w-3.5 h-3.5 text-[#ff5d02] shrink-0" />
                   <span>{f.cluster} Industrial Area</span>
                 </div>
 
                 {f.gstin && (
-                  <div className="text-[11px] font-mono text-stone-500 mt-1">
+                  <div className="text-[11px] font-mono text-muted-foreground/70 mt-1">
                     GSTIN: <span className="text-[#ea580c] font-bold">{f.gstin}</span>
                   </div>
                 )}
 
                 {f.kspcb_consent_id && (
-                  <div className="mt-2 p-2 rounded-xl bg-stone-50 border border-stone-200/80 text-stone-700">
+                  <div className="mt-2 p-2 rounded-xl bg-muted border border-border/80 text-muted-foreground">
                     <div className="flex items-center gap-1.5 text-[11px]">
-                      <FileCheck2 className="w-3.5 h-3.5 text-orange-600 shrink-0" />
-                      <span className="font-semibold text-stone-800">KSPCB Permit / Consent ID:</span>
+                      <FileCheck2 className="w-3.5 h-3.5 text-orange-600 dark:text-orange-300 shrink-0" />
+                      <span className="font-semibold text-foreground">KSPCB Permit / Consent ID:</span>
                     </div>
-                    <div className="font-mono text-[11px] font-bold text-stone-900 mt-0.5 pl-5">
+                    <div className="font-mono text-[11px] font-bold text-foreground mt-0.5 pl-5">
                       {f.kspcb_consent_id}
                     </div>
-                    <div className="text-[10px] text-stone-500 mt-0.5 pl-5 leading-tight">
+                    <div className="text-[10px] text-muted-foreground/70 mt-0.5 pl-5 leading-tight">
                       (Official statutory environmental permit issued by Karnataka State Pollution Control Board)
                     </div>
                   </div>
@@ -402,12 +402,12 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
 
                 {/* KSPCB XGN Monthly Quota & Headroom Bar */}
                 {f.xgn_details && (
-                  <div className="mt-2.5 p-2.5 rounded-xl bg-orange-50/50 border border-orange-200/70 text-xs space-y-1.5">
+                  <div className="mt-2.5 p-2.5 rounded-xl bg-orange-50/50 dark:bg-orange-950/40 border border-orange-200/70 dark:border-orange-800/60 text-xs space-y-1.5">
                     <div className="flex items-center justify-between text-[10px] font-mono">
-                      <span className="font-bold text-stone-700 uppercase">
+                      <span className="font-bold text-muted-foreground uppercase">
                         XGN Quota ({f.xgn_details.consent_type || f.xgn_details.category || 'Consent'})
                       </span>
-                      <span className="text-stone-500">Exp: {f.xgn_details.valid_till}</span>
+                      <span className="text-muted-foreground/70">Exp: {f.xgn_details.valid_till}</span>
                     </div>
 
                     <div className="w-full bg-stone-200 h-1.5 rounded-full overflow-hidden">
@@ -419,9 +419,9 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
                       />
                     </div>
 
-                    <div className="flex justify-between text-[10px] font-mono text-stone-600">
+                    <div className="flex justify-between text-[10px] font-mono text-muted-foreground">
                       <span>Consumed: {f.xgn_details.current_month_consumed_tons} T</span>
-                      <span className="font-bold text-emerald-700">
+                      <span className="font-bold text-emerald-700 dark:text-emerald-300">
                         Headroom: {f.xgn_details.authorized_monthly_quota_tons - f.xgn_details.current_month_consumed_tons} T
                       </span>
                     </div>
@@ -435,30 +435,30 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
                       onClick={() =>
                         setExpandedAssayMap((prev) => ({ ...prev, [f.id]: !prev[f.id] }))
                       }
-                      className="w-full p-2 rounded-xl bg-stone-50 hover:bg-stone-100 border border-stone-200 flex items-center justify-between text-xs text-stone-700 transition"
+                      className="w-full p-2 rounded-xl bg-muted hover:bg-muted border border-border flex items-center justify-between text-xs text-muted-foreground transition"
                     >
                       <div className="flex items-center gap-1.5 font-medium">
-                        <FlaskConical className="w-3.5 h-3.5 text-orange-600" />
+                        <FlaskConical className="w-3.5 h-3.5 text-orange-600 dark:text-orange-300" />
                         <span>NABL Assay: {f.lab_assay.overall_grade}</span>
                       </div>
                       {expandedAssayMap[f.id] ? (
-                        <ChevronUp className="w-3.5 h-3.5 text-stone-400" />
+                        <ChevronUp className="w-3.5 h-3.5 text-muted-foreground/70" />
                       ) : (
-                        <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
+                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/70" />
                       )}
                     </button>
 
                     {expandedAssayMap[f.id] && (
-                      <div className="mt-2 p-2.5 rounded-xl bg-white border border-stone-200 space-y-1.5 text-[10px]">
-                        <div className="text-stone-500 font-mono flex justify-between">
+                      <div className="mt-2 p-2.5 rounded-xl bg-card border border-border space-y-1.5 text-[10px]">
+                        <div className="text-muted-foreground/70 font-mono flex justify-between">
                           <span>{f.lab_assay.lab_name}</span>
-                          <span className="font-bold text-stone-700">{f.lab_assay.certificate_id}</span>
+                          <span className="font-bold text-muted-foreground">{f.lab_assay.certificate_id}</span>
                         </div>
-                        <div className="space-y-1 pt-1 border-t border-stone-100">
+                        <div className="space-y-1 pt-1 border-t border-border">
                           {f.lab_assay.parameters.map((p) => (
-                            <div key={p.name} className="flex justify-between font-mono text-stone-600">
+                            <div key={p.name} className="flex justify-between font-mono text-muted-foreground">
                               <span>{p.name}:</span>
-                              <span className="font-bold text-stone-800">
+                              <span className="font-bold text-foreground">
                                 {p.value} {p.unit} ({p.test_standard})
                               </span>
                             </div>
@@ -470,20 +470,20 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
                 )}
 
                 <div className="mt-3.5 space-y-1.5 text-xs">
-                  <div className="flex items-center justify-between py-1 border-b border-stone-100">
-                    <span className="text-stone-500">Material Stream:</span>
+                  <div className="flex items-center justify-between py-1 border-b border-border">
+                    <span className="text-muted-foreground/70">Material Stream:</span>
                     <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${getMaterialBadgeStyles(f.material)}`}>
                       {formatMaterialTitleCase(f.material)}
                     </span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-stone-100">
-                    <span className="text-stone-500">Monthly Volume:</span>
-                    <span className="font-bold text-stone-900 font-mono">
+                  <div className="flex justify-between py-1 border-b border-border">
+                    <span className="text-muted-foreground/70">Monthly Volume:</span>
+                    <span className="font-bold text-foreground font-mono">
                       {f.volume_tons_per_month} tons/mo
                     </span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-stone-100">
-                    <span className="text-stone-500">
+                  <div className="flex justify-between py-1 border-b border-border">
+                    <span className="text-muted-foreground/70">
                       {f.role === 'seller' ? 'Cost Floor (Min):' : 'Cost Ceiling (Max):'}
                     </span>
                     <span className="font-bold font-mono text-[#ea580c]">
@@ -492,15 +492,15 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
                         : f.cost_ceiling_inr_per_ton ? `₹${f.cost_ceiling_inr_per_ton}/t` : '—'}
                     </span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-stone-100">
-                    <span className="text-stone-500">Hazard Profile:</span>
+                  <div className="flex justify-between py-1 border-b border-border">
+                    <span className="text-muted-foreground/70">Hazard Profile:</span>
                     {f.hazardous ? (
-                      <span className="inline-flex items-center gap-1 font-semibold text-amber-700 text-[11px]">
+                      <span className="inline-flex items-center gap-1 font-semibold text-amber-700 dark:text-amber-300 text-[11px]">
                         <AlertTriangle className="w-3 h-3" />
                         Hazardous
                       </span>
                     ) : (
-                      <span className="text-emerald-700 text-[11px] font-medium">Non-Hazardous</span>
+                      <span className="text-emerald-700 dark:text-emerald-300 text-[11px] font-medium">Non-Hazardous</span>
                     )}
                   </div>
                 </div>
@@ -513,23 +513,23 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
                 )}
               </div>
 
-              <div className="mt-4 pt-3 border-t border-stone-100">
+              <div className="mt-4 pt-3 border-t border-border">
                 {descriptionMap[f.id] ? (
-                  <div className="p-3.5 rounded-2xl bg-orange-50/70 border border-orange-200 text-xs text-stone-800 space-y-2 mb-2.5 shadow-2xs">
-                    <div className="flex items-center justify-between border-b border-orange-200/60 pb-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-orange-800 font-mono flex items-center gap-1">
-                        <Sparkles className="w-3 h-3 text-orange-600" />
+                  <div className="p-3.5 rounded-2xl bg-orange-50/70 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 text-xs text-foreground space-y-2 mb-2.5 shadow-2xs">
+                    <div className="flex items-center justify-between border-b border-orange-200/60 dark:border-orange-800/60 pb-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-orange-800 dark:text-orange-300 font-mono flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-orange-600 dark:text-orange-300" />
                         Plant Lead Operational Briefing
                       </span>
                       <button
                         onClick={() => handleDescribe(f.id)}
                         disabled={explainingId === f.id}
-                        className="text-[10px] text-orange-700 hover:text-orange-950 font-semibold underline disabled:opacity-50"
+                        className="text-[10px] text-orange-700 dark:text-orange-300 hover:text-orange-950 dark:hover:text-orange-300 font-semibold underline disabled:opacity-50"
                       >
                         {explainingId === f.id ? 'Refreshing...' : 'Get Fresh Angle'}
                       </button>
                     </div>
-                    <p className="text-stone-700 text-xs leading-relaxed whitespace-pre-line">
+                    <p className="text-muted-foreground text-xs leading-relaxed whitespace-pre-line">
                       {descriptionMap[f.id]}
                     </p>
                   </div>
@@ -538,9 +538,9 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
                 <button
                   onClick={() => handleDescribe(f.id)}
                   disabled={explainingId === f.id}
-                  className="w-full py-2 px-3 rounded-xl bg-stone-100 hover:bg-orange-100 text-stone-800 hover:text-orange-950 font-semibold text-xs transition flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  className="w-full py-2 px-3 rounded-xl bg-muted hover:bg-orange-100 dark:hover:bg-orange-950/40 text-foreground hover:text-orange-950 dark:hover:text-orange-300 font-semibold text-xs transition flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-orange-600" />
+                  <Sparkles className="w-3.5 h-3.5 text-orange-600 dark:text-orange-300" />
                   <span>
                     {explainingId === f.id
                       ? 'Consulting Plant Lead...'
@@ -556,15 +556,15 @@ export const FacilitiesTab: React.FC<FacilitiesTabProps> = ({
       </section>
 
       {/* Compliance & Statutory Rules (Positioned at the bottom of the page) */}
-      <section className="bg-white rounded-2xl sm:rounded-3xl border border-orange-200/80 p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <section className="bg-card rounded-2xl sm:rounded-3xl border border-orange-200/80 dark:border-orange-800/60 p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="text-xs font-black tracking-wider text-[#ea580c] uppercase mb-1.5 font-mono">
             COMPLIANCE & STATUTORY RULES
           </div>
-          <h2 className="text-lg sm:text-xl font-bold text-stone-900">
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">
             KSPCB Authorizations & CPCB C&D Management Rules 2016
           </h2>
-          <p className="text-xs sm:text-sm text-stone-500 max-w-2xl mt-1">
+          <p className="text-xs sm:text-sm text-muted-foreground/70 max-w-2xl mt-1">
             Governed by BIS IS:383:2016 (Recycled Concrete Aggregate), MoEFCC Fly Ash Notification SO 5481(E), and Hazardous Waste Rules 2016 (Schedule II & IV).
           </p>
         </div>
