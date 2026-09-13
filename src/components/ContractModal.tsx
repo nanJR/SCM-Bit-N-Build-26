@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CircularPurchaseOrder, EWayBill, HazardousManifestForm10 } from '../types';
+import { CircularPurchaseOrder, EWayBill, HazardousManifestForm10, SettlementRecord } from '../types';
 import {
   FileText,
   Truck,
@@ -23,6 +23,7 @@ interface ContractModalProps {
   contract?: CircularPurchaseOrder;
   ewayBill?: EWayBill;
   hazardManifest?: HazardousManifestForm10;
+  settlement?: SettlementRecord;
 }
 
 export const ContractModal: React.FC<ContractModalProps> = ({
@@ -31,6 +32,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
   contract,
   ewayBill,
   hazardManifest,
+  settlement,
 }) => {
   const [activeTab, setActiveTab] = useState<'po' | 'eway' | 'hazard'>('po');
   const [copied, setCopied] = useState(false);
@@ -264,6 +266,31 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                       <span>Freight Total:</span>
                       <span className="text-sky-700">₹{contract.freight_line_item.freight_total_inr.toLocaleString('en-IN')}</span>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Settlement & Escrow Agent */}
+              {settlement && (
+                <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 text-xs space-y-3">
+                  <div className="font-bold text-emerald-900 text-xs flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                    <span>Smart Escrow Settlement: {settlement.escrow_voucher_id}</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
+                    <div className="p-2.5 rounded-lg bg-white border border-emerald-200">
+                      <span className="text-stone-500 block font-sans">T+0 Advance ({settlement.advance_pct}%)</span>
+                      <span className="font-bold text-emerald-700 text-sm">₹{settlement.advance_inr.toLocaleString('en-IN')}</span>
+                      <span className="text-[10px] text-stone-400 block font-sans">{settlement.advance_upi_ref}</span>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-white border border-emerald-200">
+                      <span className="text-stone-500 block font-sans">Balance on Delivery</span>
+                      <span className="font-bold text-stone-800 text-sm">₹{settlement.balance_inr.toLocaleString('en-IN')}</span>
+                      <span className="text-[10px] text-stone-400 block font-sans">{settlement.balance_release_condition}</span>
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-emerald-700 font-sans">
+                    Middleman ("katoti") deduction capped at {settlement.katoti_cap_pct}% — well below traditional uncapped deductions.
                   </div>
                 </div>
               )}

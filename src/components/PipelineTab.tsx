@@ -624,6 +624,60 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
                       </div>
                     )}
 
+                    {/* Aggregator / Micro-Lot Pooling Agent breakdown */}
+                    {r.pooled_members && r.pooled_members.length > 0 && (
+                      <div className="p-3.5 rounded-xl bg-white border border-stone-200 text-xs space-y-2.5 shadow-2xs">
+                        <div className="font-bold text-stone-800 flex items-center gap-1.5">
+                          <Building2 className="w-4 h-4 text-purple-600" />
+                          <span>Aggregator Agent: Pooled Micro-Lot Consignment ({r.pooled_members.length} MSMEs)</span>
+                        </div>
+                        <div className="rounded-lg border border-stone-200 overflow-hidden">
+                          <table className="w-full text-left text-[11px]">
+                            <thead className="bg-stone-100 text-stone-600 font-semibold">
+                              <tr>
+                                <th className="p-2">MSME</th>
+                                <th className="p-2 text-right">Volume</th>
+                                <th className="p-2 text-right">Share</th>
+                                <th className="p-2 text-right">Freight Share</th>
+                                <th className="p-2 text-right">Net Payout</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-stone-100 font-mono">
+                              {r.pooled_members.map((m) => (
+                                <tr key={m.facility_id}>
+                                  <td className="p-2 font-sans text-stone-800">{m.facility_name}</td>
+                                  <td className="p-2 text-right">{m.volume_tons}t</td>
+                                  <td className="p-2 text-right">{m.share_pct}%</td>
+                                  <td className="p-2 text-right">₹{m.freight_share_inr}</td>
+                                  <td className="p-2 text-right font-bold text-emerald-700">₹{m.net_payout_inr}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <p className="text-[10px] text-stone-500">
+                          Individually too small for a dedicated freight route — pooled together, shared fixed
+                          dispatch overhead splits proportionally by volume instead of eating each MSME's margin alone.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Settlement & Escrow Agent */}
+                    {r.passport?.deal.settlement && (
+                      <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200 text-xs space-y-1.5">
+                        <div className="font-bold text-emerald-900 flex items-center gap-1.5">
+                          <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                          <span>Settlement & Escrow Agent: {r.passport.deal.settlement.escrow_voucher_id}</span>
+                        </div>
+                        <div className="text-emerald-900 font-mono">
+                          T+0 Advance ({r.passport.deal.settlement.advance_pct}%): ₹{r.passport.deal.settlement.advance_inr} via {r.passport.deal.settlement.advance_upi_ref} • Balance ₹{r.passport.deal.settlement.balance_inr} on delivery confirmation
+                        </div>
+                        <div className="text-[10px] text-emerald-700">
+                          Middleman deduction capped at {r.passport.deal.settlement.katoti_cap_pct}% (vs. traditional uncapped deductions).
+                        </div>
+                      </div>
+                    )}
+
                     {/* Limitation 4: Passport Hash Link & PO / GST E-Way Bill Inspector */}
                     {r.passport && (
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-white border border-stone-200 text-xs gap-3">
@@ -673,6 +727,7 @@ export const PipelineTab: React.FC<PipelineTabProps> = ({
           contract={selectedContractItem.passport?.deal.contract}
           ewayBill={selectedContractItem.passport?.deal.eway_bill}
           hazardManifest={selectedContractItem.passport?.deal.hazard_manifest}
+          settlement={selectedContractItem.passport?.deal.settlement}
         />
       )}
     </div>

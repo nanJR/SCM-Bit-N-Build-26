@@ -118,6 +118,26 @@ export interface Facility {
   };
 }
 
+export interface PooledMember {
+  facility_id: string;
+  facility_name: string;
+  volume_tons: number;
+  share_pct: number;
+  freight_share_inr: number;
+  net_payout_inr: number;
+}
+
+export interface SettlementRecord {
+  escrow_voucher_id: string;
+  total_payable_inr: number;
+  advance_pct: number;
+  advance_inr: number;
+  advance_upi_ref: string;
+  balance_inr: number;
+  balance_release_condition: string;
+  katoti_cap_pct: number;
+}
+
 export type VehicleType = 'Mini Truck (Tata Ace)' | '10-Wheeler Truck' | 'Tipper Trailer' | 'Bulk Tanker';
 
 export interface Carrier {
@@ -297,6 +317,8 @@ export interface PassportDealData {
   eway_bill?: EWayBill;
   hazard_manifest?: HazardousManifestForm10;
   logistics_deal?: LogisticsLineItem;
+  settlement?: SettlementRecord;
+  pooled_members?: PooledMember[];
 }
 
 export interface DigitalWastePassport {
@@ -314,6 +336,8 @@ export interface PipelineItemResult {
   logistics_deal: FreightNegotiationResult | null;
   regulatory: RegulatoryDecision | null;
   passport: DigitalWastePassport | null;
+  pooled_members?: PooledMember[] | null;
+  is_pooled_consignment?: boolean;
 }
 
 export interface LedgerVerification {
