@@ -118,6 +118,20 @@ export interface Facility {
   };
 }
 
+export type VehicleType = 'Mini Truck (Tata Ace)' | '10-Wheeler Truck' | 'Tipper Trailer' | 'Bulk Tanker';
+
+export interface Carrier {
+  id: string;
+  name: string;
+  cluster: string;
+  lat: number;
+  lon: number;
+  vehicle_type: VehicleType;
+  capacity_tons: number;
+  rate_floor_inr_per_ton_km: number;
+  hazmat_transport_license: boolean;
+}
+
 export interface RouteFeasibility {
   distance_km: number;
   feasible: boolean;
@@ -163,6 +177,36 @@ export interface NegotiationResult {
   quality_adjustment_applied?: number;
 }
 
+export interface FreightNegotiationRound {
+  round: number;
+  carrier_ask_inr_per_ton_km: number;
+  shipper_bid_inr_per_ton_km: number;
+  carrier_note: string;
+  shipper_note: string;
+}
+
+export type LogisticsOutcome = 'DEAL' | 'NO_CARRIER';
+
+export interface FreightNegotiationResult {
+  carrier_id: string | null;
+  carrier_name: string | null;
+  vehicle_type: VehicleType | null;
+  outcome: LogisticsOutcome;
+  final_rate_inr_per_ton_km: number | null;
+  total_freight_cost_inr: number | null;
+  reason: string | null;
+  rounds: FreightNegotiationRound[];
+}
+
+export interface LogisticsLineItem {
+  carrier_id: string;
+  carrier_name: string;
+  vehicle_type: VehicleType;
+  agreed_rate_inr_per_ton_km: number;
+  total_freight_cost_inr: number;
+  negotiation_rounds: FreightNegotiationRound[];
+}
+
 export interface RegulatoryDecision {
   decision: 'APPROVED' | 'VETOED' | 'NOT_APPLICABLE';
   rule_applied?: string;
@@ -178,6 +222,18 @@ export interface RegulatoryDecision {
     seller_expiry: string;
     buyer_expiry: string;
   };
+}
+
+export interface FreightLineItem {
+  carrier_name: string;
+  vehicle_type: VehicleType;
+  rate_inr_per_ton_km: number;
+  distance_km: number;
+  freight_subtotal_inr: number;
+  freight_gst_rate_pct: number;
+  freight_cgst_inr: number;
+  freight_sgst_inr: number;
+  freight_total_inr: number;
 }
 
 export interface CircularPurchaseOrder {
@@ -199,6 +255,7 @@ export interface CircularPurchaseOrder {
   payment_terms: string;
   quality_assay_ref: string;
   demurrage_clause: string;
+  freight_line_item?: FreightLineItem;
 }
 
 export interface EWayBill {
@@ -239,6 +296,7 @@ export interface PassportDealData {
   contract?: CircularPurchaseOrder;
   eway_bill?: EWayBill;
   hazard_manifest?: HazardousManifestForm10;
+  logistics_deal?: LogisticsLineItem;
 }
 
 export interface DigitalWastePassport {
@@ -253,6 +311,7 @@ export interface PipelineItemResult {
   seller: Facility;
   buyer: Facility;
   negotiation: NegotiationResult;
+  logistics_deal: FreightNegotiationResult | null;
   regulatory: RegulatoryDecision | null;
   passport: DigitalWastePassport | null;
 }

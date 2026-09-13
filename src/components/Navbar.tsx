@@ -1,10 +1,10 @@
 import React from 'react';
-import { RotateCcw, Factory, Play, MessageSquareText, BookOpen, ShieldCheck, AlertCircle, HelpCircle, TrendingDown, Droplets } from 'lucide-react';
+import { RotateCcw, Factory, Play, MessageSquareText, BookOpen, ShieldCheck, AlertCircle, HelpCircle, TrendingDown, Droplets, Truck } from 'lucide-react';
 import { PipelineItemResult } from '../types';
 
 interface NavbarProps {
-  activeTab: 'facilities' | 'pipeline' | 'transcripts' | 'ledger';
-  setActiveTab: (tab: 'facilities' | 'pipeline' | 'transcripts' | 'ledger') => void;
+  activeTab: 'facilities' | 'fleet' | 'pipeline' | 'transcripts' | 'ledger';
+  setActiveTab: (tab: 'facilities' | 'fleet' | 'pipeline' | 'transcripts' | 'ledger') => void;
   onReset: () => void;
   resetting: boolean;
   onOpenStandards?: () => void;
@@ -88,6 +88,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Factory className="w-3.5 h-3.5" />
               <span>Factories</span>
+            </button>
+
+            <button
+              id="nav-fleet-tab"
+              onClick={() => setActiveTab('fleet')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold rounded-lg sm:rounded-full transition-all ${
+                activeTab === 'fleet'
+                  ? 'bg-[#ff5d02] text-white shadow-xs'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-white/80'
+              }`}
+            >
+              <Truck className="w-3.5 h-3.5" />
+              <span>Fleet</span>
             </button>
 
             <button

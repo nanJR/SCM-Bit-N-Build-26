@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { FacilitiesTab } from './components/FacilitiesTab';
+import { FleetTab } from './components/FleetTab';
 import { PipelineTab } from './components/PipelineTab';
 import { TranscriptsTab } from './components/TranscriptsTab';
 import { LedgerTab } from './components/LedgerTab';
 import { ArchitectureStandardsModal } from './components/ArchitectureStandardsModal';
 import { HonestLimitationsModal } from './components/HonestLimitationsModal';
 import { GlossaryModal } from './components/GlossaryModal';
-import { DigitalWastePassport, Facility, LedgerVerification, PipelineItemResult } from './types';
+import { Carrier, DigitalWastePassport, Facility, LedgerVerification, PipelineItemResult } from './types';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<'facilities' | 'pipeline' | 'transcripts' | 'ledger'>('facilities');
+  const [activeTab, setActiveTab] = useState<'facilities' | 'fleet' | 'pipeline' | 'transcripts' | 'ledger'>('facilities');
   const [isStandardsModalOpen, setIsStandardsModalOpen] = useState<boolean>(false);
   const [isLimitationsModalOpen, setIsLimitationsModalOpen] = useState<boolean>(false);
   const [isGlossaryModalOpen, setIsGlossaryModalOpen] = useState<boolean>(false);
   const [facilities, setFacilities] = useState<Record<string, Facility>>({});
+  const [carriers, setCarriers] = useState<Record<string, Carrier>>({});
   const [results, setResults] = useState<PipelineItemResult[]>([]);
   const [passports, setPassports] = useState<DigitalWastePassport[]>([]);
   const [verification, setVerification] = useState<LedgerVerification | null>(null);
@@ -30,8 +32,9 @@ export function App() {
   const loadInitialData = async () => {
     try {
       setLoading(true);
-      const [facRes, pipeRes, ledRes] = await Promise.all([
+      const [facRes, carRes, pipeRes, ledRes] = await Promise.all([
         fetch('/api/facilities'),
+        fetch('/api/carriers'),
         fetch('/api/pipeline/results'),
         fetch('/api/ledger'),
       ]);
@@ -39,6 +42,11 @@ export function App() {
       if (facRes.ok) {
         const facData = await facRes.json();
         setFacilities(facData.facilities || {});
+      }
+
+      if (carRes.ok) {
+        const carData = await carRes.json();
+        setCarriers(carData.carriers || {});
       }
 
       if (pipeRes.ok) {
@@ -209,6 +217,8 @@ export function App() {
                 onOpenStandards={() => setIsStandardsModalOpen(true)}
               />
             )}
+
+            {activeTab === 'fleet' && <FleetTab carriers={carriers} />}
 
             {activeTab === 'pipeline' && (
               <PipelineTab

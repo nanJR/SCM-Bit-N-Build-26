@@ -1,7 +1,7 @@
 import React from 'react';
 import { PipelineItemResult } from '../types';
 import { formatMaterialTitleCase, getMaterialBadgeStyles } from '../utils/materials';
-import { FileText, ArrowRight, Scale, CheckCircle2, XCircle, ShieldAlert, Sparkles, Building2 } from 'lucide-react';
+import { FileText, ArrowRight, Scale, CheckCircle2, XCircle, ShieldAlert, Sparkles, Building2, Truck } from 'lucide-react';
 
 interface TranscriptsTabProps {
   results: PipelineItemResult[];
@@ -32,6 +32,7 @@ export const TranscriptsTab: React.FC<TranscriptsTabProps> = ({
   const seller = currentResult?.seller;
   const buyer = currentResult?.buyer;
   const match = currentResult?.match;
+  const logisticsDeal = currentResult?.logistics_deal;
 
   return (
     <div className="space-y-6">
@@ -63,7 +64,8 @@ export const TranscriptsTab: React.FC<TranscriptsTabProps> = ({
             >
               {results.map((r, i) => (
                 <option key={i} value={i}>
-                  {r.seller.name.slice(0, 24)} ↔ {r.buyer.name.slice(0, 24)} ({r.negotiation.outcome.replace(/_/g, ' ')})
+                  {r.seller.name.slice(0, 24)} ↔ {r.buyer.name.slice(0, 24)} ({r.negotiation.outcome.replace(/_/g, ' ')}
+                  {r.logistics_deal?.outcome === 'NO_CARRIER' ? ' + Freight: NO CARRIER' : ''})
                 </option>
               ))}
             </select>
@@ -219,6 +221,97 @@ export const TranscriptsTab: React.FC<TranscriptsTabProps> = ({
               );
             })}
           </div>
+
+          {/* Freight Negotiation Section */}
+          {logisticsDeal && (
+            <div className="space-y-4 pt-2 border-t border-stone-100">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#ea580c] font-mono flex items-center gap-1.5">
+                  <Truck className="w-3.5 h-3.5" />
+                  Freight Negotiation (Carrier ↔ Shipper)
+                </h3>
+                {logisticsDeal.outcome === 'DEAL' ? (
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>
+                      {logisticsDeal.carrier_name} ({logisticsDeal.vehicle_type}) @ ₹{logisticsDeal.final_rate_inr_per_ton_km}/ton-km
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold">
+                    <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
+                    <span>NO CARRIER AVAILABLE</span>
+                  </div>
+                )}
+              </div>
+
+              {logisticsDeal.outcome === 'NO_CARRIER' ? (
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed">
+                  {logisticsDeal.reason}
+                </div>
+              ) : (
+                <>
+                  <div className="text-xs text-stone-500">
+                    Total Freight Cost: <strong className="text-stone-800 font-mono">₹{logisticsDeal.total_freight_cost_inr}</strong>
+                  </div>
+                  {logisticsDeal.rounds.map((round) => {
+                    const gap = round.carrier_ask_inr_per_ton_km - round.shipper_bid_inr_per_ton_km;
+                    const isOverlapped = gap <= 0;
+
+                    return (
+                      <div
+                        key={round.round}
+                        className={`p-5 rounded-2xl border transition ${
+                          isOverlapped
+                            ? 'bg-emerald-50/40 border-emerald-300 ring-1 ring-emerald-200'
+                            : 'bg-white border-stone-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-3.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-stone-100 text-stone-800">
+                              Round {round.round}
+                            </span>
+                            {isOverlapped && (
+                              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">
+                                ✓ Rate Overlap Achieved
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="p-3.5 rounded-xl bg-sky-50/60 border border-sky-200 text-xs">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="font-bold text-sky-900">Carrier Quote</span>
+                              <span className="font-mono text-sky-700 font-bold text-sm">
+                                Ask: ₹{round.carrier_ask_inr_per_ton_km}/ton-km
+                              </span>
+                            </div>
+                            <p className="text-stone-700 italic text-xs mt-1.5 leading-relaxed bg-white/60 p-2 rounded-lg border border-sky-100">
+                              "{round.carrier_note}"
+                            </p>
+                          </div>
+
+                          <div className="p-3.5 rounded-xl bg-violet-50/60 border border-violet-200 text-xs">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="font-bold text-violet-900">Shipper Bid</span>
+                              <span className="font-mono text-violet-700 font-bold text-sm">
+                                Bid: ₹{round.shipper_bid_inr_per_ton_km}/ton-km
+                              </span>
+                            </div>
+                            <p className="text-stone-700 italic text-xs mt-1.5 leading-relaxed bg-white/60 p-2 rounded-lg border border-violet-100">
+                              "{round.shipper_note}"
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

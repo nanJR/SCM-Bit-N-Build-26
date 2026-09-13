@@ -1,4 +1,4 @@
-import { Facility } from '../src/types';
+import { Carrier, Facility } from '../src/types';
 
 export const CLUSTERS: Record<string, [number, number]> = {
   Peenya: [13.028, 77.52],
@@ -150,6 +150,68 @@ export const MATERIAL_TAXONOMY: Record<string, { category: string; hazard: boole
     defaultGstRate: 5,
   },
 };
+
+export function getDefaultCarriers(): Record<string, Carrier> {
+  const carriers: Record<string, Carrier> = {
+    CAR01: {
+      id: 'CAR01',
+      name: 'Namma Fleet Movers (Peenya)',
+      cluster: 'Peenya',
+      lat: CLUSTERS.Peenya[0],
+      lon: CLUSTERS.Peenya[1],
+      vehicle_type: 'Mini Truck (Tata Ace)',
+      capacity_tons: 5,
+      rate_floor_inr_per_ton_km: 4.5,
+      hazmat_transport_license: false,
+    },
+    CAR02: {
+      id: 'CAR02',
+      name: 'Bengaluru Bulk Carriers (Dobaspet)',
+      cluster: 'Dobaspet',
+      lat: CLUSTERS.Dobaspet[0],
+      lon: CLUSTERS.Dobaspet[1],
+      vehicle_type: '10-Wheeler Truck',
+      capacity_tons: 40,
+      rate_floor_inr_per_ton_km: 3.2,
+      hazmat_transport_license: false,
+    },
+    CAR03: {
+      id: 'CAR03',
+      name: 'Swasthik Tippers & Logistics (Harohalli)',
+      cluster: 'Harohalli',
+      lat: CLUSTERS.Harohalli[0],
+      lon: CLUSTERS.Harohalli[1],
+      vehicle_type: 'Tipper Trailer',
+      capacity_tons: 80,
+      rate_floor_inr_per_ton_km: 2.6,
+      hazmat_transport_license: false,
+    },
+    CAR04: {
+      id: 'CAR04',
+      name: 'VaruTrans Hazmat Carriers (Bidadi)',
+      cluster: 'Bidadi',
+      lat: CLUSTERS.Bidadi[0],
+      lon: CLUSTERS.Bidadi[1],
+      vehicle_type: 'Bulk Tanker',
+      capacity_tons: 15,
+      rate_floor_inr_per_ton_km: 30.0, // Specialized hazmat tanker: premium rate, guaranteed NO_CARRIER on tight hazardous lanes
+      hazmat_transport_license: true,
+    },
+    CAR05: {
+      id: 'CAR05',
+      name: 'Kaveri Heavy Haulage (Whitefield)',
+      cluster: 'Whitefield',
+      lat: CLUSTERS.Whitefield[0],
+      lon: CLUSTERS.Whitefield[1],
+      vehicle_type: '10-Wheeler Truck',
+      capacity_tons: 300,
+      rate_floor_inr_per_ton_km: 1.8,
+      hazmat_transport_license: false,
+    },
+  };
+
+  return carriers;
+}
 
 export function getDefaultFacilities(): Record<string, Facility> {
   const facilities: Record<string, Facility> = {

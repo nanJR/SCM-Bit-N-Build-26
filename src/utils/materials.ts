@@ -43,3 +43,21 @@ export function getMaterialBadgeStyles(mat: string): string {
   }
   return 'bg-orange-100 text-orange-900 border border-orange-300';
 }
+
+export function getVehicleBadgeStyles(vehicleType: string): string {
+  const norm = (vehicleType || '').toLowerCase();
+
+  if (norm.includes('mini truck')) {
+    return 'bg-lime-100 text-lime-900 border border-lime-300';
+  }
+  if (norm.includes('10-wheeler')) {
+    return 'bg-blue-100 text-blue-900 border border-blue-300';
+  }
+  if (norm.includes('tipper')) {
+    return 'bg-indigo-100 text-indigo-900 border border-indigo-300';
+  }
+  if (norm.includes('tanker')) {
+    return 'bg-rose-100 text-rose-900 border border-rose-300';
+  }
+  return 'bg-stone-100 text-stone-900 border border-stone-300';
+}
